@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -164,8 +164,8 @@ const performanceData = [
 export function LeadManagement() {
   const [activeTab, setActiveTab] = useState("vc");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStage, setSelectedStage] = useState("all");
-  const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [selectedStage, setSelectedStage] = useState("All");
+  const [selectedPlatform, setSelectedPlatform] = useState("All");
   const [selectedDateRange, setSelectedDateRange] = useState("All");
   const [selectedTeam, setSelectedTeam] = useState("All");
   const [showFloatingFilter, setShowFloatingFilter] = useState(false);
@@ -182,12 +182,41 @@ export function LeadManagement() {
     Upwork: Briefcase
   };
 
-  // Filtered leads based on active tab
+  // Filtered leads based on active tab and all filters
   const currentLeads = activeTab === "vc" ? vcLeads : ceoLeads;
-  const filteredLeads = currentLeads.filter(lead => 
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.company.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLeads = currentLeads.filter(lead => {
+    const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lead.company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStage = selectedStage === "All" || formatStage(lead.stage) === selectedStage;
+    const matchesPlatform = selectedPlatform === "All" || lead.platforms.includes(selectedPlatform);
+    
+    return matchesSearch && matchesStage && matchesPlatform;
+  });
+
+  // Dynamic pipeline data based on filtered leads
+  const pipelineData = useMemo(() => {
+    const stages = ["contact", "call_scheduled", "proposal_sent", "onboarding", "follow_up", "announcement"];
+    return stages.map(stage => ({
+      stage: formatStage(stage),
+      count: filteredLeads.filter(lead => lead.stage === stage).length
+    }));
+  }, [filteredLeads]);
+
+  // Dynamic platform performance data
+  const platformPerformanceData = useMemo(() => {
+    const platformCounts: { [key: string]: number } = {};
+    filteredLeads.forEach(lead => {
+      lead.platforms.forEach(platform => {
+        platformCounts[platform] = (platformCounts[platform] || 0) + 1;
+      });
+    });
+    
+    return Object.entries(platformCounts).map(([platform, count]) => ({
+      platform,
+      count: count as number,
+      percentage: filteredLeads.length > 0 ? Math.round((count / filteredLeads.length) * 100) : 0
+    }));
+  }, [filteredLeads]);
 
 
   const getStatusColor = (status: string) => {
@@ -201,13 +230,13 @@ export function LeadManagement() {
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case "contact": return "bg-blue-100 text-blue-800";
-      case "call_scheduled": return "bg-green-100 text-green-800";
-      case "proposal_sent": return "bg-purple-100 text-purple-800";
-      case "onboarding": return "bg-emerald-100 text-emerald-800";
-      case "follow_up": return "bg-yellow-100 text-yellow-800";
-      case "announcement": return "bg-pink-100 text-pink-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "contact": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "call_scheduled": return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "proposal_sent": return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      case "onboarding": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+      case "follow_up": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "announcement": return "bg-pink-500/20 text-pink-400 border-pink-500/30";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -255,7 +284,7 @@ export function LeadManagement() {
         </TabsList>
 
         {/* Filter Section */}
-        <div className="flex flex-wrap gap-4 items-center py-4 border-b">
+        <div className="flex flex-wrap gap-4 items-center py-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
@@ -263,26 +292,28 @@ export function LeadManagement() {
               placeholder="Search leads..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
           
           <select
             value={selectedStage}
             onChange={(e) => setSelectedStage(e.target.value)}
-            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           >
             <option value="All">All Stages</option>
             <option value="Contact">Contact</option>
             <option value="Call Scheduled">Call Scheduled</option>
             <option value="Follow-up">Follow-up</option>
             <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Onboarding">Onboarding</option>
+            <option value="Announcement">Announcement</option>
           </select>
 
           <select
             value={selectedPlatform}
             onChange={(e) => setSelectedPlatform(e.target.value)}
-            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           >
             <option value="All">All Platforms</option>
             <option value="LinkedIn">LinkedIn</option>
@@ -307,13 +338,14 @@ export function LeadManagement() {
 
         {/* Floating Filter */}
         {showFloatingFilter && (
-          <div className="fixed top-20 right-4 z-50 bg-white border rounded-lg shadow-lg p-4 w-80">
+          <div className="fixed top-20 right-4 z-50 bg-card border border-border rounded-lg shadow-lg p-4 w-80">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Advanced Filters</h3>
+              <h3 className="font-semibold text-foreground">Advanced Filters</h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowFloatingFilter(false)}
+                className="text-muted-foreground hover:text-foreground"
               >
                 ×
               </Button>
@@ -321,11 +353,11 @@ export function LeadManagement() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">Date Range</label>
                 <select
                   value={selectedDateRange}
                   onChange={(e) => setSelectedDateRange(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                 >
                   <option value="All">All Time</option>
                   <option value="Last Week">Last Week</option>
@@ -336,11 +368,11 @@ export function LeadManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Team Member</label>
+                <label className="block text-sm font-medium mb-2 text-foreground">Team Member</label>
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                 >
                   <option value="All">All Team Members</option>
                   <option value="John Doe">John Doe</option>
@@ -351,8 +383,8 @@ export function LeadManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Sort By</label>
-                <select className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                <label className="block text-sm font-medium mb-2 text-foreground">Sort By</label>
+                <select className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground">
                   <option value="date">Date Added</option>
                   <option value="name">Name</option>
                   <option value="stage">Stage</option>
@@ -360,7 +392,7 @@ export function LeadManagement() {
                 </select>
               </div>
 
-              <Button className="w-full">Apply Filters</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Apply Filters</Button>
             </div>
           </div>
         )}
