@@ -162,7 +162,7 @@ const performanceData = [
   { name: "Alice Brown", contacted: 35, scheduled: 22, proposals: 20, closed: 14 }
 ];
 
-export function LeadManagement() {
+const LeadManagement = () => {
   const [activeTab, setActiveTab] = useState("vc");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("All");
@@ -763,4 +763,6 @@ export function LeadManagement() {
       </Card>
     </div>
   );
-}
+};
+
+export { LeadManagement };
