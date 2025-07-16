@@ -583,129 +583,137 @@ export default function LeadManagement() {
       </div>
 
       {/* Visual Trends */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         <h2 className="text-2xl font-bold text-foreground">Visual Analytics</h2>
         
-        {/* Two-column layout for charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Two-column layout for charts with proper spacing */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Monthly Trends */}
-          <Card className="bg-gradient-card">
-            <CardHeader>
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
               <CardTitle className="text-primary">Monthly Trends</CardTitle>
               <CardDescription>Revenue, leads, and conversion trends over time</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  revenue: { label: "Revenue", color: "hsl(var(--primary))" },
-                  leads: { label: "Leads", color: "hsl(var(--chart-2))" },
-                  conversions: { label: "Conversions", color: "hsl(var(--chart-3))" }
-                }}
-                className="h-[350px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyTrends}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="month" className="text-muted-foreground" />
-                    <YAxis className="text-muted-foreground" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area type="monotone" dataKey="revenue" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
-                    <Area type="monotone" dataKey="leads" stackId="2" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.6} />
-                    <Area type="monotone" dataKey="conversions" stackId="3" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.6} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    revenue: { label: "Revenue", color: "hsl(var(--primary))" },
+                    leads: { label: "Leads", color: "hsl(var(--chart-2))" },
+                    conversions: { label: "Conversions", color: "hsl(var(--chart-3))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Area type="monotone" dataKey="revenue" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="leads" stackId="2" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="conversions" stackId="3" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.6} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
 
           {/* Platform Trends */}
-          <Card className="bg-gradient-card">
-            <CardHeader>
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
               <CardTitle className="text-primary">Platform Performance</CardTitle>
               <CardDescription>Lead generation and revenue by platform</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  leads: { label: "Leads", color: "hsl(var(--primary))" },
-                  revenue: { label: "Revenue", color: "hsl(var(--accent))" }
-                }}
-                className="h-[350px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={platformTrends}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="platform" className="text-muted-foreground" />
-                    <YAxis className="text-muted-foreground" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="leads" fill="hsl(var(--primary))" />
-                    <Bar dataKey="revenue" fill="hsl(var(--accent))" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    leads: { label: "Leads", color: "hsl(var(--primary))" },
+                    revenue: { label: "Revenue", color: "hsl(var(--accent))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={platformTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="platform" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="leads" fill="hsl(var(--primary))" />
+                      <Bar dataKey="revenue" fill="hsl(var(--accent))" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
 
           {/* Revenue Trends */}
-          <Card className="bg-gradient-card">
-            <CardHeader>
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
               <CardTitle className="text-primary">Revenue Trends by Lead Type</CardTitle>
               <CardDescription>CEO vs VC revenue performance over quarters</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  ceo: { label: "CEO Revenue", color: "hsl(var(--primary))" },
-                  vc: { label: "VC Revenue", color: "hsl(var(--accent))" }
-                }}
-                className="h-[350px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueTrends}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="quarter" className="text-muted-foreground" />
-                    <YAxis className="text-muted-foreground" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="ceo" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: "hsl(var(--primary))" }} />
-                    <Line type="monotone" dataKey="vc" stroke="hsl(var(--accent))" strokeWidth={3} dot={{ fill: "hsl(var(--accent))" }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    ceo: { label: "CEO Revenue", color: "hsl(var(--primary))" },
+                    vc: { label: "VC Revenue", color: "hsl(var(--accent))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={revenueTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="quarter" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line type="monotone" dataKey="ceo" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: "hsl(var(--primary))" }} />
+                      <Line type="monotone" dataKey="vc" stroke="hsl(var(--accent))" strokeWidth={3} dot={{ fill: "hsl(var(--accent))" }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
 
           {/* Lead Status Distribution */}
-          <Card className="bg-gradient-card">
-            <CardHeader>
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
               <CardTitle className="text-primary">Lead Status Distribution</CardTitle>
               <CardDescription>Current status of all leads in pipeline</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  value: { label: "Leads" }
-                }}
-                className="h-[350px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--accent))"} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px] flex items-center justify-center">
+                <ChartContainer
+                  config={{
+                    value: { label: "Leads" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--accent))"} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
