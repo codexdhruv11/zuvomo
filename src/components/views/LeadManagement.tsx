@@ -23,7 +23,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
-// Sample lead data
+// Sample lead data with CEO/VC outreach info
 const leadData = [
   {
     id: 1,
@@ -37,7 +37,13 @@ const leadData = [
     probability: 70,
     lastContact: "2024-01-15",
     assignedTo: "Alice Johnson",
-    notes: "Interested in enterprise package"
+    notes: "Interested in enterprise package",
+    contactType: "CEO",
+    responsibility: "Product Demo Scheduled",
+    recommendations: "Follow up on enterprise features, prepare ROI analysis",
+    outreachType: "CEO",
+    nextAction: "Schedule technical call",
+    urgency: "high"
   },
   {
     id: 2,
@@ -51,7 +57,13 @@ const leadData = [
     probability: 85,
     lastContact: "2024-01-14",
     assignedTo: "Bob Wilson",
-    notes: "Ready to sign, waiting for approval"
+    notes: "Ready to sign, waiting for approval",
+    contactType: "VC",
+    responsibility: "Contract Review",
+    recommendations: "Expedite legal review, prepare implementation timeline",
+    outreachType: "VC",
+    nextAction: "Schedule final approval meeting",
+    urgency: "high"
   },
   {
     id: 3,
@@ -65,7 +77,13 @@ const leadData = [
     probability: 30,
     lastContact: "2024-01-13",
     assignedTo: "Alice Johnson",
-    notes: "Initial interest shown"
+    notes: "Initial interest shown",
+    contactType: "CEO",
+    responsibility: "Needs Assessment",
+    recommendations: "Conduct discovery call, identify pain points",
+    outreachType: "CEO",
+    nextAction: "Schedule discovery call",
+    urgency: "medium"
   },
   {
     id: 4,
@@ -79,7 +97,13 @@ const leadData = [
     probability: 60,
     lastContact: "2024-01-12",
     assignedTo: "Charlie Brown",
-    notes: "Price negotiation in progress"
+    notes: "Price negotiation in progress",
+    contactType: "VC",
+    responsibility: "Price Negotiation",
+    recommendations: "Prepare competitive analysis, offer volume discount",
+    outreachType: "VC",
+    nextAction: "Present revised proposal",
+    urgency: "high"
   },
   {
     id: 5,
@@ -93,7 +117,73 @@ const leadData = [
     probability: 100,
     lastContact: "2024-01-10",
     assignedTo: "Bob Wilson",
-    notes: "Deal closed successfully"
+    notes: "Deal closed successfully",
+    contactType: "CEO",
+    responsibility: "Onboarding Support",
+    recommendations: "Ensure smooth implementation, schedule kickoff meeting",
+    outreachType: "CEO",
+    nextAction: "Begin onboarding process",
+    urgency: "low"
+  },
+  {
+    id: 6,
+    name: "Emma Thompson",
+    company: "Growth Capital",
+    email: "emma.t@growthcap.com",
+    phone: "+1 (555) 567-8901",
+    stage: "qualified",
+    source: "referral",
+    value: 150000,
+    probability: 75,
+    lastContact: "2024-01-16",
+    assignedTo: "Alice Johnson",
+    notes: "Interested in full platform suite",
+    contactType: "VC",
+    responsibility: "Platform Demo",
+    recommendations: "Showcase advanced analytics, prepare case studies",
+    outreachType: "VC",
+    nextAction: "Schedule platform demo",
+    urgency: "high"
+  },
+  {
+    id: 7,
+    name: "Robert Kim",
+    company: "NextGen Ventures",
+    email: "r.kim@nextgen.com",
+    phone: "+1 (555) 678-9012",
+    stage: "contacted",
+    source: "linkedin",
+    value: 200000,
+    probability: 40,
+    lastContact: "2024-01-11",
+    assignedTo: "Charlie Brown",
+    notes: "Exploring options for portfolio companies",
+    contactType: "VC",
+    responsibility: "Portfolio Assessment",
+    recommendations: "Understand portfolio needs, prepare multi-company proposal",
+    outreachType: "VC",
+    nextAction: "Portfolio needs analysis",
+    urgency: "medium"
+  },
+  {
+    id: 8,
+    name: "Jennifer Lee",
+    company: "Innovation Labs",
+    email: "j.lee@innovlabs.com",
+    phone: "+1 (555) 789-0123",
+    stage: "proposal",
+    source: "website",
+    value: 95000,
+    probability: 80,
+    lastContact: "2024-01-09",
+    assignedTo: "Bob Wilson",
+    notes: "Reviewing proposal with board",
+    contactType: "CEO",
+    responsibility: "Board Approval",
+    recommendations: "Prepare board presentation, highlight quick wins",
+    outreachType: "CEO",
+    nextAction: "Board presentation",
+    urgency: "high"
   }
 ];
 
@@ -130,6 +220,8 @@ export default function LeadManagement() {
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedSource, setSelectedSource] = useState("all");
   const [selectedAssignee, setSelectedAssignee] = useState("all");
+  const [selectedOutreachType, setSelectedOutreachType] = useState("all");
+  const [selectedPeriod, setSelectedPeriod] = useState("last-month");
 
   // Filter leads based on search and filters
   const filteredLeads = useMemo(() => {
@@ -141,10 +233,11 @@ export default function LeadManagement() {
       const matchesStage = selectedStage === "all" || lead.stage === selectedStage;
       const matchesSource = selectedSource === "all" || lead.source === selectedSource;
       const matchesAssignee = selectedAssignee === "all" || lead.assignedTo === selectedAssignee;
+      const matchesOutreachType = selectedOutreachType === "all" || lead.outreachType === selectedOutreachType;
 
-      return matchesSearch && matchesStage && matchesSource && matchesAssignee;
+      return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType;
     });
-  }, [searchTerm, selectedStage, selectedSource, selectedAssignee]);
+  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType]);
 
   // Calculate metrics
   const totalLeads = leadData.length;
@@ -152,6 +245,24 @@ export default function LeadManagement() {
   const totalValue = leadData.reduce((sum, lead) => sum + lead.value, 0);
   const avgDealSize = totalValue / totalLeads;
   const conversionRate = (leadData.filter(lead => lead.stage === "closed-won").length / totalLeads * 100).toFixed(1);
+  
+  // CEO/VC specific metrics
+  const ceoLeads = leadData.filter(lead => lead.outreachType === "CEO");
+  const vcLeads = leadData.filter(lead => lead.outreachType === "VC");
+  const ceoConversionRate = (ceoLeads.filter(lead => lead.stage === "closed-won").length / ceoLeads.length * 100).toFixed(1);
+  const vcConversionRate = (vcLeads.filter(lead => lead.stage === "closed-won").length / vcLeads.length * 100).toFixed(1);
+  const ceoTotalValue = ceoLeads.reduce((sum, lead) => sum + lead.value, 0);
+  const vcTotalValue = vcLeads.reduce((sum, lead) => sum + lead.value, 0);
+  
+  // Status distribution for pie chart
+  const statusData = [
+    { name: "New", value: leadData.filter(lead => lead.stage === "new").length, color: "hsl(var(--chart-1))" },
+    { name: "Contacted", value: leadData.filter(lead => lead.stage === "contacted").length, color: "hsl(var(--chart-2))" },
+    { name: "Qualified", value: leadData.filter(lead => lead.stage === "qualified").length, color: "hsl(var(--chart-3))" },
+    { name: "Proposal", value: leadData.filter(lead => lead.stage === "proposal").length, color: "hsl(var(--chart-4))" },
+    { name: "Negotiation", value: leadData.filter(lead => lead.stage === "negotiation").length, color: "hsl(var(--chart-5))" },
+    { name: "Closed Won", value: leadData.filter(lead => lead.stage === "closed-won").length, color: "hsl(var(--primary))" }
+  ].filter(item => item.value > 0);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -188,6 +299,76 @@ export default function LeadManagement() {
             Add Lead
           </Button>
         </div>
+      </div>
+
+      {/* Trend Buttons */}
+      <div className="flex gap-2 mb-6">
+        <Button 
+          variant={selectedPeriod === "last-week" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setSelectedPeriod("last-week")}
+        >
+          Last Week
+        </Button>
+        <Button 
+          variant={selectedPeriod === "last-month" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setSelectedPeriod("last-month")}
+        >
+          Last Month
+        </Button>
+        <Button 
+          variant={selectedPeriod === "last-12-months" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setSelectedPeriod("last-12-months")}
+        >
+          Last 12 Months
+        </Button>
+      </div>
+
+      {/* CEO/VC Outreach Tiles */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">CEO Outreach</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{ceoLeads.length}</div>
+            <p className="text-xs text-muted-foreground">Total CEO Contacts</p>
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Conversion Rate:</span>
+                <span className="font-medium">{ceoConversionRate}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Pipeline Value:</span>
+                <span className="font-medium">{formatCurrency(ceoTotalValue)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">VC Outreach</CardTitle>
+            <TrendingUp className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{vcLeads.length}</div>
+            <p className="text-xs text-muted-foreground">Total VC Contacts</p>
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Conversion Rate:</span>
+                <span className="font-medium">{vcConversionRate}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Pipeline Value:</span>
+                <span className="font-medium">{formatCurrency(vcTotalValue)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Key Metrics */}
@@ -272,8 +453,8 @@ export default function LeadManagement() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lead Sources</CardTitle>
-            <CardDescription>Distribution of leads by acquisition channel</CardDescription>
+            <CardTitle>Lead Status Distribution</CardTitle>
+            <CardDescription>Current status of all leads in pipeline</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -285,7 +466,7 @@ export default function LeadManagement() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={sourceData}
+                    data={statusData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -293,7 +474,7 @@ export default function LeadManagement() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {sourceData.map((entry, index) => (
+                    {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -351,6 +532,27 @@ export default function LeadManagement() {
                 <SelectItem value="cold-call">Cold Call</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={selectedOutreachType} onValueChange={setSelectedOutreachType}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="CEO">CEO</SelectItem>
+                <SelectItem value="VC">VC</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Team Member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Team Members</SelectItem>
+                <SelectItem value="Alice Johnson">Alice Johnson</SelectItem>
+                <SelectItem value="Bob Wilson">Bob Wilson</SelectItem>
+                <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Leads Table */}
@@ -364,9 +566,12 @@ export default function LeadManagement() {
                       <Badge className={stageColors[lead.stage as keyof typeof stageColors]}>
                         {getStageLabel(lead.stage)}
                       </Badge>
+                      <Badge variant="outline" className={lead.outreachType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
+                        {lead.outreachType}
+                      </Badge>
                       <span className="text-sm text-muted-foreground">• {lead.company}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
                         {lead.email}
@@ -379,6 +584,24 @@ export default function LeadManagement() {
                         <Calendar className="h-3 w-3" />
                         Last contact: {lead.lastContact}
                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium text-foreground">Responsibility:</span>
+                        <p className="text-muted-foreground">{lead.responsibility}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground">Next Action:</span>
+                        <p className="text-muted-foreground">{lead.nextAction}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground">Assigned to:</span>
+                        <p className="text-muted-foreground">{lead.assignedTo}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-medium text-foreground">Recommendations:</span>
+                      <p className="text-sm text-muted-foreground">{lead.recommendations}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
