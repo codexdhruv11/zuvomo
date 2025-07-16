@@ -31,7 +31,9 @@ import {
   Bell,
   MessageCircle,
   Folder,
-  Star
+  Star,
+  SlidersHorizontal,
+  Globe
 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, FunnelChart, Funnel, LabelList } from "recharts";
@@ -164,12 +166,29 @@ export function LeadManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [selectedDateRange, setSelectedDateRange] = useState("All");
+  const [selectedTeam, setSelectedTeam] = useState("All");
+  const [showFloatingFilter, setShowFloatingFilter] = useState(false);
 
+  // Platform icons mapping
+  const platformIcons = {
+    LinkedIn: Globe,
+    Email: Mail,
+    Telegram: MessageSquare,
+    Discord: MessageSquare,
+    Reference: Users,
+    "Website Form": Globe,
+    "Zuvomo Lead": Target,
+    Upwork: Briefcase
+  };
+
+  // Filtered leads based on active tab
   const currentLeads = activeTab === "vc" ? vcLeads : ceoLeads;
   const filteredLeads = currentLeads.filter(lead => 
     lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lead.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -218,16 +237,133 @@ export function LeadManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="vc" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/50 p-1">
+          <TabsTrigger 
+            value="vc" 
+            className="flex items-center gap-2 h-full data-[state=active]:bg-purple-500 data-[state=active]:text-white font-medium"
+          >
             <Crown className="h-4 w-4" />
             VC Outreach
           </TabsTrigger>
-          <TabsTrigger value="ceo" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="ceo" 
+            className="flex items-center gap-2 h-full data-[state=active]:bg-indigo-500 data-[state=active]:text-white font-medium"
+          >
             <Briefcase className="h-4 w-4" />
             CEO Outreach
           </TabsTrigger>
         </TabsList>
+
+        {/* Filter Section */}
+        <div className="flex flex-wrap gap-4 items-center py-4 border-b">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search leads..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          
+          <select
+            value={selectedStage}
+            onChange={(e) => setSelectedStage(e.target.value)}
+            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="All">All Stages</option>
+            <option value="Contact">Contact</option>
+            <option value="Call Scheduled">Call Scheduled</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+          </select>
+
+          <select
+            value={selectedPlatform}
+            onChange={(e) => setSelectedPlatform(e.target.value)}
+            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="All">All Platforms</option>
+            <option value="LinkedIn">LinkedIn</option>
+            <option value="Email">Email</option>
+            <option value="Telegram">Telegram</option>
+            <option value="Discord">Discord</option>
+            <option value="Reference">Reference</option>
+            <option value="Website Form">Website Form</option>
+            <option value="Zuvomo Lead">Zuvomo Lead</option>
+            <option value="Upwork">Upwork</option>
+          </select>
+
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowFloatingFilter(!showFloatingFilter)}
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Advanced Filter
+          </Button>
+        </div>
+
+        {/* Floating Filter */}
+        {showFloatingFilter && (
+          <div className="fixed top-20 right-4 z-50 bg-white border rounded-lg shadow-lg p-4 w-80">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Advanced Filters</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFloatingFilter(false)}
+              >
+                ×
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <select
+                  value={selectedDateRange}
+                  onChange={(e) => setSelectedDateRange(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="All">All Time</option>
+                  <option value="Last Week">Last Week</option>
+                  <option value="Last Month">Last Month</option>
+                  <option value="Last 12 Months">Last 12 Months</option>
+                  <option value="Custom">Custom Range</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Team Member</label>
+                <select
+                  value={selectedTeam}
+                  onChange={(e) => setSelectedTeam(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="All">All Team Members</option>
+                  <option value="John Doe">John Doe</option>
+                  <option value="Jane Smith">Jane Smith</option>
+                  <option value="Mike Johnson">Mike Johnson</option>
+                  <option value="Sarah Wilson">Sarah Wilson</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Sort By</label>
+                <select className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                  <option value="date">Date Added</option>
+                  <option value="name">Name</option>
+                  <option value="stage">Stage</option>
+                  <option value="platform">Platform</option>
+                </select>
+              </div>
+
+              <Button className="w-full">Apply Filters</Button>
+            </div>
+          </div>
+        )}
 
         <TabsContent value="vc" className="space-y-6">
           {/* VC Pipeline Analytics */}
@@ -352,13 +488,17 @@ export function LeadManagement() {
                           <Badge variant="outline" className={getStageColor(lead.stage)}>
                             {formatStage(lead.stage)}
                           </Badge>
-                          <div className="flex gap-1">
-                            {lead.platforms.map((platform, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {platform}
-                              </Badge>
-                            ))}
-                          </div>
+                           <div className="flex gap-1">
+                             {lead.platforms.map((platform, index) => {
+                               const IconComponent = platformIcons[platform] || Globe;
+                               return (
+                                 <Badge key={index} variant="secondary" className="text-xs flex items-center gap-1">
+                                   <IconComponent className="h-3 w-3" />
+                                   {platform}
+                                 </Badge>
+                               );
+                             })}
+                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">{lead.notes}</p>
                       </div>
@@ -507,13 +647,17 @@ export function LeadManagement() {
                           <Badge variant="outline" className={getStageColor(lead.stage)}>
                             {formatStage(lead.stage)}
                           </Badge>
-                          <div className="flex gap-1">
-                            {lead.platforms.map((platform, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {platform}
-                              </Badge>
-                            ))}
-                          </div>
+                           <div className="flex gap-1">
+                             {lead.platforms.map((platform, index) => {
+                               const IconComponent = platformIcons[platform] || Globe;
+                               return (
+                                 <Badge key={index} variant="secondary" className="text-xs flex items-center gap-1">
+                                   <IconComponent className="h-3 w-3" />
+                                   {platform}
+                                 </Badge>
+                               );
+                             })}
+                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">{lead.notes}</p>
                       </div>

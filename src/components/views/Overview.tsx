@@ -21,7 +21,8 @@ import {
   Edit,
   MoreHorizontal,
   Filter,
-  Search
+  Search,
+  Crown
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Overview() {
-  // Enhanced metrics data matching the reference dashboard
+  // Enhanced metrics data with VC/CEO split
   const stats = [
     {
       title: "Total Leads Contacted",
@@ -45,12 +46,21 @@ export function Overview() {
       textColor: "text-white"
     },
     {
-      title: "CEOs Engaged",
+      title: "VC Outreach",
+      value: "91", 
+      change: "+18%",
+      changeType: "increase",
+      icon: Crown,
+      bgColor: "bg-purple-500",
+      textColor: "text-white"
+    },
+    {
+      title: "CEO Outreach",
       value: "156", 
       change: "+8%",
       changeType: "increase",
       icon: Users,
-      bgColor: "bg-purple-500",
+      bgColor: "bg-indigo-500",
       textColor: "text-white"
     },
     {
