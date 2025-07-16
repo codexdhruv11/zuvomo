@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   Target, 
@@ -11,9 +12,25 @@ import {
   Calendar,
   Plus,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Star,
+  Eye,
+  Edit,
+  MoreHorizontal,
+  Filter,
+  Search
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Overview() {
   // Enhanced metrics data matching the reference dashboard
@@ -56,57 +73,154 @@ export function Overview() {
     }
   ];
 
-  // Daily outreach activity data
-  const dailyActivity = [
-    { day: 'Mon', calls: 12, emails: 8 },
-    { day: 'Tue', calls: 15, emails: 12 },
-    { day: 'Wed', calls: 8, emails: 15 },
-    { day: 'Thu', calls: 20, emails: 10 },
-    { day: 'Fri', calls: 18, emails: 18 },
+  // Opportunities data with actionable insights
+  const opportunities = [
+    { stage: 'Qualify', value: 12, amount: '$125K' },
+    { stage: 'Meet & Present', value: 8, amount: '$95K' },
+    { stage: 'Proposal', value: 15, amount: '$180K' },
+    { stage: 'Negotiate', value: 6, amount: '$75K' },
+    { stage: 'Closed Won', value: 4, amount: '$65K' },
   ];
 
-  // Service demand distribution data
-  const serviceDemand = [
-    { name: 'Advisory', value: 35, color: '#3B82F6' },
-    { name: 'Marketing', value: 25, color: '#8B5CF6' },
-    { name: 'Fundraising', value: 30, color: '#10B981' },
-    { name: 'Combined', value: 10, color: '#F59E0B' },
-  ];
-
-  // Recent high-value leads
-  const recentLeads = [
+  // My Tasks - actionable items
+  const myTasks = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      company: "TechCorp Inc.",
-      email: "sarah@techcorp.com",
-      phone: "+1 (555) 123-4567",
-      status: "hot",
-      source: "Website",
-      value: "$15,000",
+      task: "Call Sarah Johnson",
+      type: "call",
+      priority: "high",
+      dueDate: "Today",
+      lead: "TechCorp Inc.",
+      completed: false
+    },
+    {
+      id: 2,
+      task: "Check contract responses",
+      type: "review",
+      priority: "medium", 
+      dueDate: "Tomorrow",
+      lead: "StartupXYZ",
+      completed: false
+    },
+    {
+      id: 3,
+      task: "Send follow up emails",
+      type: "email",
+      priority: "high",
+      dueDate: "May 24",
+      lead: "Enterprise Solutions",
+      completed: true
+    },
+    {
+      id: 4,
+      task: "Update email",
+      type: "update",
+      priority: "low",
+      dueDate: "May 31",
+      lead: "Tech Innovations",
+      completed: false
+    }
+  ];
+
+  // Recommended Actions - AI-powered suggestions
+  const recommendedActions = [
+    {
+      id: 1,
+      title: "New lead assigned to you today",
+      description: "Emma Chen",
+      type: "lead",
       priority: "high"
     },
     {
       id: 2,
-      name: "Mike Chen",
-      company: "StartupXYZ",
-      email: "mike@startupxyz.com", 
-      phone: "+1 (555) 987-6543",
-      status: "warm",
-      source: "LinkedIn",
-      value: "$8,500",
-      priority: "medium"
+      title: "New lead assigned to you today",
+      description: "Michael Thompson", 
+      type: "lead",
+      priority: "high"
     },
     {
       id: 3,
-      name: "Emma Wilson",
-      company: "Enterprise Solutions",
-      email: "emma@enterprise.com",
-      phone: "+1 (555) 456-7890", 
+      title: "New lead assigned to you today",
+      description: "Sarah Wilson",
+      type: "lead", 
+      priority: "medium"
+    },
+    {
+      id: 4,
+      title: "New lead assigned to you today",
+      description: "David Rodriguez",
+      type: "lead",
+      priority: "medium"
+    }
+  ];
+
+  // Recent Records - latest activity
+  const recentRecords = [
+    {
+      id: 1,
+      name: "Carl McDouglas",
+      type: "lead",
+      action: "Created",
+      time: "2 mins ago",
+      icon: Target
+    },
+    {
+      id: 2,
+      name: "Big Deal Opportunity",
+      type: "opportunity", 
+      action: "Updated",
+      time: "5 mins ago",
+      icon: DollarSign
+    },
+    {
+      id: 3,
+      name: "Marketing Email",
+      type: "campaign",
+      action: "Sent",
+      time: "1 hour ago", 
+      icon: Mail
+    },
+    {
+      id: 4,
+      name: "Marketing",
+      type: "task",
+      action: "Completed",
+      time: "2 hours ago",
+      icon: CheckCircle
+    }
+  ];
+
+  // Enhanced lead data with more details
+  const myLeads = [
+    {
+      id: 1,
+      firstName: "Sarah",
+      lastName: "Johnson", 
+      company: "TechCorp",
+      city: "NYC",
+      state: "NY",
+      status: "hot",
+      score: 85
+    },
+    {
+      id: 2,
+      firstName: "Mike",
+      lastName: "Chen",
+      company: "StartupXYZ",
+      city: "LA", 
+      state: "CA",
+      status: "warm",
+      score: 72
+    },
+    {
+      id: 3,
+      firstName: "Emma",
+      lastName: "Wilson",
+      company: "Enterprise",
+      city: "Chi",
+      state: "IL", 
       status: "cold",
-      source: "Referral",
-      value: "$25,000",
-      priority: "high"
+      score: 45
     }
   ];
 
@@ -128,6 +242,16 @@ export function Overview() {
     }
   };
 
+  const getTaskIcon = (type: string) => {
+    switch (type) {
+      case "call": return Phone;
+      case "email": return Mail;
+      case "review": return Eye;
+      case "update": return Edit;
+      default: return CheckCircle;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with Date */}
@@ -141,10 +265,12 @@ export function Overview() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm">
-            Notifications
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
           </Button>
-          <Button variant="outline" size="sm">
-            Profile
+          <Button className="bg-gradient-primary">
+            <Plus className="h-4 w-4 mr-2" />
+            New Lead
           </Button>
         </div>
       </div>
@@ -152,7 +278,7 @@ export function Overview() {
       {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <Card key={index} className={`${stat.bgColor} border-0 shadow-lg`}>
+          <Card key={index} className={`${stat.bgColor} border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -184,56 +310,85 @@ export function Overview() {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Outreach Activity Chart */}
+      {/* Salesforce-style Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - My Leads */}
         <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Daily Outreach Activity</CardTitle>
-            <CardDescription>Calls and emails sent this week</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">My Leads</CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost">
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost">
+                New
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dailyActivity}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" stroke="hsl(var(--foreground))" />
-                <YAxis stroke="hsl(var(--foreground))" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }} 
-                />
-                <Bar dataKey="calls" fill="#3B82F6" name="Calls" />
-                <Bar dataKey="emails" fill="#8B5CF6" name="Emails" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {myLeads.map((lead) => (
+                <div key={lead.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">{lead.firstName}</span>
+                      <span className="font-medium text-foreground">{lead.lastName}</span>
+                      <Badge className={getStatusColor(lead.status)}>
+                        {lead.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{lead.company}</p>
+                    <p className="text-xs text-muted-foreground">{lead.city}, {lead.state}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 text-yellow-500" />
+                        <span className="text-sm font-medium">{lead.score}</span>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Convert</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button variant="link" className="w-full mt-4 text-primary">
+              View Report →
+            </Button>
           </CardContent>
         </Card>
 
-        {/* Service Demand Distribution */}
+        {/* Center Column - All Opportunities */}
         <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="text-foreground">Service Demand Distribution</CardTitle>
-            <CardDescription>Distribution of service requests</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">All Opportunities</CardTitle>
+            </div>
+            <Button size="sm" variant="ghost">
+              New
+            </Button>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={serviceDemand}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, value }) => `${name} ${value}%`}
-                >
-                  {serviceDemand.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={opportunities} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" stroke="hsl(var(--foreground))" />
+                <YAxis type="category" dataKey="stage" stroke="hsl(var(--foreground))" width={80} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--card))', 
@@ -241,101 +396,154 @@ export function Overview() {
                     borderRadius: '8px'
                   }} 
                 />
-              </PieChart>
+                <Bar dataKey="value" fill="#3B82F6" />
+              </BarChart>
             </ResponsiveContainer>
+            <Button variant="link" className="w-full mt-4 text-primary">
+              View Report →
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Right Column - All Contacts */}
+        <Card className="bg-gradient-card shadow-card">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">All Contacts</CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost">
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost">
+                New
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {myLeads.map((contact) => (
+                <div key={contact.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{contact.firstName} {contact.lastName}</p>
+                    <p className="text-sm text-muted-foreground">{contact.company}</p>
+                    <p className="text-xs text-muted-foreground">{contact.city}, {contact.state}</p>
+                  </div>
+                  <Button size="sm" variant="ghost">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button variant="link" className="w-full mt-4 text-primary">
+              View Report →
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* High Priority Leads */}
-      <Card className="bg-gradient-card shadow-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">High Priority Leads</CardTitle>
-          <CardDescription>Focus on these high-value prospects</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentLeads.map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">{lead.name}</h4>
-                    <p className="text-sm text-muted-foreground">{lead.company}</p>
-                    <div className="flex items-center gap-4 mt-1">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Mail className="h-3 w-3" />
-                        {lead.email}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {lead.phone}
-                      </div>
+      {/* Bottom Row - Tasks and Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* My Tasks */}
+        <Card className="bg-gradient-card shadow-card">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">My Tasks</CardTitle>
+            </div>
+            <Button size="sm" variant="ghost">
+              New
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {myTasks.map((task) => {
+                const TaskIcon = getTaskIcon(task.type);
+                return (
+                  <div key={task.id} className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
+                    <Checkbox checked={task.completed} />
+                    <TaskIcon className="h-4 w-4 text-primary" />
+                    <div className="flex-1">
+                      <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        {task.task}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{task.lead}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                        {task.priority}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground mt-1">{task.dueDate}</p>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <Badge className={getPriorityColor(lead.priority)}>
-                    {lead.priority.toUpperCase()} PRIORITY
-                  </Badge>
-                  
-                  <Badge className={getStatusColor(lead.status)}>
-                    {lead.status.toUpperCase()}
-                  </Badge>
-                  
-                  <div className="text-right">
-                    <p className="font-bold text-lg text-foreground">{lead.value}</p>
-                    <p className="text-xs text-muted-foreground">via {lead.source}</p>
+                );
+              })}
+            </div>
+            <Button variant="link" className="w-full mt-4 text-primary">
+              View All →
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Recommended Actions */}
+        <Card className="bg-gradient-card shadow-card">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Recommended Actions</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recommendedActions.map((action) => (
+                <div key={action.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{action.title}</p>
+                      <p className="text-sm font-medium text-primary">{action.description}</p>
+                    </div>
                   </div>
-
-                  <Button size="sm" className="bg-gradient-primary">
-                    Contact
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="ghost">
+                      <MoreHorizontal className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Quick Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-card shadow-card cursor-pointer hover:shadow-glow transition-all group">
-          <CardContent className="p-6 text-center">
-            <Calendar className="h-12 w-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
-            <CardTitle className="text-foreground mb-2">Schedule Follow-ups</CardTitle>
-            <CardDescription>Set automated reminders for important leads</CardDescription>
-            <Button className="mt-4 w-full bg-gradient-primary">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Reminder
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-card shadow-card cursor-pointer hover:shadow-glow transition-all group">
-          <CardContent className="p-6 text-center">
-            <Mail className="h-12 w-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
-            <CardTitle className="text-foreground mb-2">Send Campaigns</CardTitle>
-            <CardDescription>Create targeted email marketing campaigns</CardDescription>
-            <Button className="mt-4 w-full bg-gradient-primary">
-              <Mail className="h-4 w-4 mr-2" />
-              New Campaign
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-card shadow-card cursor-pointer hover:shadow-glow transition-all group">
-          <CardContent className="p-6 text-center">
-            <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
-            <CardTitle className="text-foreground mb-2">View Analytics</CardTitle>
-            <CardDescription>Deep dive into your sales performance</CardDescription>
-            <Button className="mt-4 w-full bg-gradient-primary">
-              <TrendingUp className="h-4 w-4 mr-2" />
-              View Reports
-            </Button>
+        {/* Recent Records */}
+        <Card className="bg-gradient-card shadow-card">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Recent Records</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentRecords.map((record) => (
+                <div key={record.id} className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
+                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <record.icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{record.name}</p>
+                    <p className="text-xs text-muted-foreground">{record.action} • {record.time}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {record.type}
+                  </Badge>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
