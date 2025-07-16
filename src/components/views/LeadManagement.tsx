@@ -163,6 +163,7 @@ const performanceData = [
 ];
 
 export default function LeadManagement() {
+  console.log("LeadManagement component is rendering");
   const [activeTab, setActiveTab] = useState("vc");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("All");

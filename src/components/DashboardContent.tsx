@@ -15,6 +15,7 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ currentView, userRole }: DashboardContentProps) {
+  console.log("Current view:", currentView);
   const renderView = () => {
     switch (currentView) {
       case "overview":
