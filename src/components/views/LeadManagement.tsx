@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   TrendingUp, 
@@ -18,10 +19,13 @@ import {
   Edit,
   Trash2,
   Download,
-  Upload
+  Upload,
+  CalendarDays,
+  BarChart3,
+  PieChart as PieChartIcon
 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 // Sample lead data with CEO/VC outreach info
 const leadData = [
@@ -197,6 +201,34 @@ const conversionData = [
   { month: "Jun", leads: 67, qualified: 45, proposals: 28, closed: 18 }
 ];
 
+// Monthly trends data
+const monthlyTrends = [
+  { month: "Jan", revenue: 850000, leads: 45, conversions: 8 },
+  { month: "Feb", revenue: 1200000, leads: 52, conversions: 12 },
+  { month: "Mar", revenue: 950000, leads: 48, conversions: 10 },
+  { month: "Apr", revenue: 1425000, leads: 61, conversions: 15 },
+  { month: "May", revenue: 1330000, leads: 55, conversions: 14 },
+  { month: "Jun", revenue: 1710000, leads: 67, conversions: 18 }
+];
+
+// Platform trends data
+const platformTrends = [
+  { platform: "LinkedIn", leads: 95, revenue: 2850000, growth: 15.2 },
+  { platform: "Website", leads: 78, revenue: 2340000, growth: 8.7 },
+  { platform: "Referrals", leads: 64, revenue: 1920000, growth: 22.1 },
+  { platform: "Cold Email", leads: 45, revenue: 1350000, growth: -3.2 },
+  { platform: "Events", leads: 32, revenue: 960000, growth: 11.8 }
+];
+
+// Revenue trends data
+const revenueTrends = [
+  { quarter: "Q1 2023", ceo: 2100000, vc: 1800000 },
+  { quarter: "Q2 2023", ceo: 2450000, vc: 2200000 },
+  { quarter: "Q3 2023", ceo: 2800000, vc: 2650000 },
+  { quarter: "Q4 2023", ceo: 3200000, vc: 3100000 },
+  { quarter: "Q1 2024", ceo: 3650000, vc: 3500000 }
+];
+
 const sourceData = [
   { name: "Website", value: 35, color: "hsl(var(--chart-1))" },
   { name: "Referral", value: 25, color: "hsl(var(--chart-2))" },
@@ -222,6 +254,25 @@ export default function LeadManagement() {
   const [selectedAssignee, setSelectedAssignee] = useState("all");
   const [selectedOutreachType, setSelectedOutreachType] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("last-month");
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
+  const [selectedProjectStages, setSelectedProjectStages] = useState<string[]>([]);
+  const [selectedLeadTypes, setSelectedLeadTypes] = useState<string[]>([]);
+  const [selectedConversionRange, setSelectedConversionRange] = useState("all");
+  const [selectedContactStatus, setSelectedContactStatus] = useState<string[]>([]);
+  const [selectedProposalStatus, setSelectedProposalStatus] = useState<string[]>([]);
+
+  // Filter options
+  const teamMembers = ["Alice Johnson", "Bob Wilson", "Charlie Brown"];
+  const projectStages = ["Discovery", "Demo", "Proposal", "Negotiation", "Implementation"];
+  const leadTypes = ["CEO", "VC"];
+  const conversionRanges = [
+    { label: "0-25%", value: "0-25" },
+    { label: "26-50%", value: "26-50" },
+    { label: "51-75%", value: "51-75" },
+    { label: "76-100%", value: "76-100" }
+  ];
+  const contactStatuses = ["Contacted", "Not Contacted", "Follow-up Needed"];
+  const proposalStatuses = ["Sent", "Not Sent", "Under Review"];
 
   // Filter leads based on search and filters
   const filteredLeads = useMemo(() => {
@@ -301,29 +352,177 @@ export default function LeadManagement() {
         </div>
       </div>
 
-      {/* Trend Buttons */}
-      <div className="flex gap-2 mb-6">
-        <Button 
-          variant={selectedPeriod === "last-week" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setSelectedPeriod("last-week")}
-        >
-          Last Week
-        </Button>
-        <Button 
-          variant={selectedPeriod === "last-month" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setSelectedPeriod("last-month")}
-        >
-          Last Month
-        </Button>
-        <Button 
-          variant={selectedPeriod === "last-12-months" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setSelectedPeriod("last-12-months")}
-        >
-          Last 12 Months
-        </Button>
+      {/* Date Range and Filters */}
+      <div className="space-y-4 mb-6">
+        {/* Date Range Dropdown */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select date range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="last-week">Last Week</SelectItem>
+                <SelectItem value="last-month">Last Month</SelectItem>
+                <SelectItem value="last-12-months">Last 12 Months</SelectItem>
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Multi-select Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Team Members Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Team Members
+            </h4>
+            <div className="space-y-2">
+              {teamMembers.map((member) => (
+                <div key={member} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`team-${member}`}
+                    checked={selectedTeamMembers.includes(member)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedTeamMembers([...selectedTeamMembers, member]);
+                      } else {
+                        setSelectedTeamMembers(selectedTeamMembers.filter(m => m !== member));
+                      }
+                    }}
+                  />
+                  <label htmlFor={`team-${member}`} className="text-sm">{member}</label>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Project Stage Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Project Stage
+            </h4>
+            <div className="space-y-2">
+              {projectStages.map((stage) => (
+                <div key={stage} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`stage-${stage}`}
+                    checked={selectedProjectStages.includes(stage)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedProjectStages([...selectedProjectStages, stage]);
+                      } else {
+                        setSelectedProjectStages(selectedProjectStages.filter(s => s !== stage));
+                      }
+                    }}
+                  />
+                  <label htmlFor={`stage-${stage}`} className="text-sm">{stage}</label>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Lead Type Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Lead Type
+            </h4>
+            <div className="space-y-2">
+              {leadTypes.map((type) => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`type-${type}`}
+                    checked={selectedLeadTypes.includes(type)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedLeadTypes([...selectedLeadTypes, type]);
+                      } else {
+                        setSelectedLeadTypes(selectedLeadTypes.filter(t => t !== type));
+                      }
+                    }}
+                  />
+                  <label htmlFor={`type-${type}`} className="text-sm">{type}</label>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Conversion Rate Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <PieChartIcon className="h-4 w-4" />
+              Conversion %
+            </h4>
+            <Select value={selectedConversionRange} onValueChange={setSelectedConversionRange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ranges</SelectItem>
+                {conversionRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Card>
+
+          {/* Contact Status Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              Contact Status
+            </h4>
+            <div className="space-y-2">
+              {contactStatuses.map((status) => (
+                <div key={status} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`contact-${status}`}
+                    checked={selectedContactStatus.includes(status)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedContactStatus([...selectedContactStatus, status]);
+                      } else {
+                        setSelectedContactStatus(selectedContactStatus.filter(s => s !== status));
+                      }
+                    }}
+                  />
+                  <label htmlFor={`contact-${status}`} className="text-sm">{status}</label>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Proposal Status Filter */}
+          <Card className="p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Proposals Sent
+            </h4>
+            <div className="space-y-2">
+              {proposalStatuses.map((status) => (
+                <div key={status} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`proposal-${status}`}
+                    checked={selectedProposalStatus.includes(status)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedProposalStatus([...selectedProposalStatus, status]);
+                      } else {
+                        setSelectedProposalStatus(selectedProposalStatus.filter(s => s !== status));
+                      }
+                    }}
+                  />
+                  <label htmlFor={`proposal-${status}`} className="text-sm">{status}</label>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* CEO/VC Outreach Tiles */}
@@ -414,6 +613,97 @@ export default function LeadManagement() {
           <CardContent>
             <div className="text-2xl font-bold">{conversionRate}%</div>
             <p className="text-xs text-muted-foreground">+2.1% from last month</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Visual Trends */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-foreground">Visual Analytics</h2>
+        
+        {/* Monthly Trends */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Trends</CardTitle>
+            <CardDescription>Revenue, leads, and conversion trends over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                revenue: { label: "Revenue", color: "hsl(var(--chart-1))" },
+                leads: { label: "Leads", color: "hsl(var(--chart-2))" },
+                conversions: { label: "Conversions", color: "hsl(var(--chart-3))" }
+              }}
+              className="h-[400px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="month" className="text-muted-foreground" />
+                  <YAxis className="text-muted-foreground" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area type="monotone" dataKey="revenue" stackId="1" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="leads" stackId="2" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="conversions" stackId="3" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.6} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Platform Trends */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Platform Performance</CardTitle>
+            <CardDescription>Lead generation and revenue by platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                leads: { label: "Leads", color: "hsl(var(--chart-1))" },
+                revenue: { label: "Revenue", color: "hsl(var(--chart-2))" }
+              }}
+              className="h-[350px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={platformTrends}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="platform" className="text-muted-foreground" />
+                  <YAxis className="text-muted-foreground" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="leads" fill="hsl(var(--chart-1))" />
+                  <Bar dataKey="revenue" fill="hsl(var(--chart-2))" />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Revenue Trends */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue Trends by Lead Type</CardTitle>
+            <CardDescription>CEO vs VC revenue performance over quarters</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                ceo: { label: "CEO Revenue", color: "hsl(var(--chart-1))" },
+                vc: { label: "VC Revenue", color: "hsl(var(--chart-2))" }
+              }}
+              className="h-[350px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={revenueTrends}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="quarter" className="text-muted-foreground" />
+                  <YAxis className="text-muted-foreground" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line type="monotone" dataKey="ceo" stroke="hsl(var(--chart-1))" strokeWidth={3} dot={{ fill: "hsl(var(--chart-1))" }} />
+                  <Line type="monotone" dataKey="vc" stroke="hsl(var(--chart-2))" strokeWidth={3} dot={{ fill: "hsl(var(--chart-2))" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
