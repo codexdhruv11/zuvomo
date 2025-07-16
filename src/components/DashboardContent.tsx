@@ -1,4 +1,4 @@
-import { LeadManagement } from "@/components/views/LeadManagement";
+import LeadManagement from "@/components/views/LeadManagement";
 import { Overview } from "@/components/views/Overview";
 import { Contacts } from "@/components/views/Contacts";
 import { Analytics } from "@/components/views/Analytics";
