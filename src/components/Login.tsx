@@ -18,10 +18,12 @@ export function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     
     // Mock authentication
-    if (email === "admin@zuvomo.com" && password === "admin123") {
-      onLogin("admin");
-    } else if (email === "user@zuvomo.com" && password === "user123") {
-      onLogin("user");
+    if (email === "superadmin@zuvomo.com" && password === "super123") {
+      onLogin("superadmin");
+    } else if (email === "sales@zuvomo.com" && password === "sales123") {
+      onLogin("sales");
+    } else if (email === "analyst@zuvomo.com" && password === "analyst123") {
+      onLogin("analyst");
     } else {
       setError("Invalid credentials");
     }
@@ -73,8 +75,9 @@ export function Login({ onLogin }: LoginProps) {
           
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo Credentials:</p>
-            <p>Admin: admin@zuvomo.com / admin123</p>
-            <p>User: user@zuvomo.com / user123</p>
+            <p>Superadmin: superadmin@zuvomo.com / super123</p>
+            <p>Sales: sales@zuvomo.com / sales123</p>
+            <p>Analyst: analyst@zuvomo.com / analyst123</p>
           </div>
         </CardContent>
       </Card>

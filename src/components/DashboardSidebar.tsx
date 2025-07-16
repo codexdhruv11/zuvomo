@@ -42,15 +42,14 @@ const adminItems = [
 interface DashboardSidebarProps {
   currentView: string;
   setCurrentView: (view: string) => void;
+  userRole: string;
 }
 
-export function DashboardSidebar({ currentView, setCurrentView }: DashboardSidebarProps) {
+export function DashboardSidebar({ currentView, setCurrentView, userRole }: DashboardSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   
-  // Mock user role - will be replaced with actual auth
-  const userRole = "admin"; // superadmin, admin, user
-  const isAdmin = userRole === "admin" || userRole === "superadmin";
+  const isAdmin = userRole === "superadmin";
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">

@@ -11,9 +11,10 @@ import { SystemSettings } from "@/components/views/SystemSettings";
 
 interface DashboardContentProps {
   currentView: string;
+  userRole: string;
 }
 
-export function DashboardContent({ currentView }: DashboardContentProps) {
+export function DashboardContent({ currentView, userRole }: DashboardContentProps) {
   const renderView = () => {
     switch (currentView) {
       case "overview":
