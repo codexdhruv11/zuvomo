@@ -4,7 +4,12 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardContent } from "@/components/DashboardContent";
 import { useState } from "react";
 
-export function Dashboard() {
+interface DashboardProps {
+  userRole: string;
+  onLogout: () => void;
+}
+
+export function Dashboard({ userRole, onLogout }: DashboardProps) {
   const [currentView, setCurrentView] = useState("overview");
   
   return (
