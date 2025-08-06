@@ -24,6 +24,7 @@ import {
   BarChart3,
   PieChart as PieChartIcon
 } from "lucide-react";
+import { AddLeadForm } from "@/components/AddLeadForm";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
@@ -345,10 +346,12 @@ export default function LeadManagement() {
             <Upload className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Lead
-          </Button>
+          <AddLeadForm>
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Lead
+            </Button>
+          </AddLeadForm>
         </div>
       </div>
 

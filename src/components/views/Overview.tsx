@@ -24,6 +24,9 @@ import {
   Search,
   Crown
 } from "lucide-react";
+import { AddLeadForm } from "@/components/AddLeadForm";
+import { PersonalizedInsights } from "@/components/PersonalizedInsights";
+import { AIDataAnalyzer } from "@/components/AIDataAnalyzer";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { Input } from "@/components/ui/input";
 import {
@@ -79,6 +82,15 @@ export function Overview() {
       changeType: "increase",
       icon: Phone,
       bgColor: "bg-orange-500", 
+      textColor: "text-white"
+    },
+    {
+      title: "Deals Closed",
+      value: "12",
+      change: "+25%",
+      changeType: "increase",
+      icon: CheckCircle,
+      bgColor: "bg-emerald-500", 
       textColor: "text-white"
     }
   ];
@@ -278,15 +290,12 @@ export function Overview() {
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          <Button className="bg-gradient-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            New Lead
-          </Button>
+          <AddLeadForm />
         </div>
       </div>
 
       {/* Enhanced Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
         {stats.map((stat, index) => (
           <Card key={index} className={`${stat.bgColor} border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}>
             <CardContent className="p-6">
@@ -556,6 +565,22 @@ export function Overview() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Personalized Insights Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-foreground">Personal Performance & AI Insights</h2>
+        </div>
+        <PersonalizedInsights />
+      </div>
+
+      {/* AI Data Analyzer */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-foreground">AI Sales Analyst</h2>
+        </div>
+        <AIDataAnalyzer />
       </div>
     </div>
   );
