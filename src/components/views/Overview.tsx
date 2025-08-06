@@ -329,6 +329,9 @@ export function Overview() {
         ))}
       </div>
 
+      {/* Personal Performance and AI Insights */}
+      <PersonalizedInsights />
+
       {/* Salesforce-style Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - My Leads */}
@@ -339,6 +342,20 @@ export function Overview() {
               <CardTitle className="text-foreground">My Leads</CardTitle>
             </div>
             <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost">
+                    <Filter className="h-4 w-4 mr-2" />
+                    All
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>All</DropdownMenuItem>
+                  <DropdownMenuItem>Hot</DropdownMenuItem>
+                  <DropdownMenuItem>Warm</DropdownMenuItem>
+                  <DropdownMenuItem>Cold</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button size="sm" variant="ghost">
                 <Search className="h-4 w-4" />
               </Button>
@@ -462,126 +479,8 @@ export function Overview() {
         </Card>
       </div>
 
-      {/* Bottom Row - Tasks and Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* My Tasks */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">My Tasks</CardTitle>
-            </div>
-            <Button size="sm" variant="ghost">
-              New
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {myTasks.map((task) => {
-                const TaskIcon = getTaskIcon(task.type);
-                return (
-                  <div key={task.id} className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
-                    <Checkbox checked={task.completed} />
-                    <TaskIcon className="h-4 w-4 text-primary" />
-                    <div className="flex-1">
-                      <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                        {task.task}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{task.lead}</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                        {task.priority}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground mt-1">{task.dueDate}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <Button variant="link" className="w-full mt-4 text-primary">
-              View All →
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recommended Actions */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Recommended Actions</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recommendedActions.map((action) => (
-                <div key={action.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{action.title}</p>
-                      <p className="text-sm font-medium text-primary">{action.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost">
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                    <Button size="sm" variant="ghost">
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Records */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Recent Records</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentRecords.map((record) => (
-                <div key={record.id} className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border hover:bg-background/70 transition-colors">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <record.icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">{record.name}</p>
-                    <p className="text-xs text-muted-foreground">{record.action} • {record.time}</p>
-                  </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {record.type}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Personalized Insights Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-foreground">Personal Performance & AI Insights</h2>
-        </div>
-        <PersonalizedInsights />
-      </div>
-
       {/* AI Data Analyzer */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-foreground">AI Sales Analyst</h2>
-        </div>
-        <AIDataAnalyzer />
-      </div>
+      <AIDataAnalyzer />
     </div>
   );
 }

@@ -237,8 +237,20 @@ export function PersonalizedInsights() {
       {/* Activity Performance */}
       <Card className="bg-gradient-card shadow-card lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-foreground">Weekly Activity Performance</CardTitle>
-          <CardDescription>Compare your activity levels with targets and last week</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-foreground">Weekly Activity Performance</CardTitle>
+              <CardDescription>Compare your activity levels with targets and performance</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                WOW (8 weeks)
+              </Button>
+              <Button variant="outline" size="sm">
+                MOM (12 months)
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>

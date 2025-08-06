@@ -26,6 +26,12 @@ import {
 } from "lucide-react";
 import { AddLeadForm } from "@/components/AddLeadForm";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 // Sample lead data with CEO/VC outreach info
@@ -338,6 +344,20 @@ export default function LeadManagement() {
           <p className="text-muted-foreground">Track and manage your sales pipeline</p>
         </div>
         <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Lead Status
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>All</DropdownMenuItem>
+              <DropdownMenuItem>Hot</DropdownMenuItem>
+              <DropdownMenuItem>Warm</DropdownMenuItem>
+              <DropdownMenuItem>Cold</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -709,7 +729,7 @@ export default function LeadManagement() {
                         dataKey="value"
                       >
                         {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--accent))"} />
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
                       <ChartTooltip content={<ChartTooltipContent />} />
