@@ -73,6 +73,17 @@ export function Login({ onLogin }: LoginProps) {
             </Button>
           </form>
           
+          <div className="mt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full"
+              onClick={() => onLogin("sales")}
+            >
+              Skip Login (Demo as Sales)
+            </Button>
+          </div>
+          
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo Credentials:</p>
             <p>Superadmin: superadmin@zuvomo.com / super123</p>
