@@ -5,15 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Moon, Sun, Bell, Shield, User, Globe } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export function Settings() {
-  const [darkMode, setDarkMode] = useState(true);
+  const { isDark, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
-
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
-  };
 
   return (
     <div className="space-y-6">
@@ -27,7 +23,7 @@ export function Settings() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
-              {darkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               Appearance
             </CardTitle>
           </CardHeader>
@@ -38,7 +34,7 @@ export function Settings() {
                 <p className="text-sm text-muted-foreground">Toggle between light and dark themes</p>
               </div>
               <Switch
-                checked={darkMode}
+                checked={isDark}
                 onCheckedChange={toggleTheme}
               />
             </div>
