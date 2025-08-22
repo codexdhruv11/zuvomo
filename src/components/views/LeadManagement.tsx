@@ -490,6 +490,270 @@ export default function LeadManagement() {
         </div>
       </div>
 
+      {/* Key Metrics */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalLeads}</div>
+            <p className="text-xs text-muted-foreground">
+              {qualifiedLeads} qualified leads
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pipeline Value</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
+            <p className="text-xs text-muted-foreground">
+              Avg: {formatCurrency(avgDealSize)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{conversionRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              CEO: {ceoConversionRate}% | VC: {vcConversionRate}%
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Revenue Split</CardTitle>
+            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(ceoTotalValue + vcTotalValue)}</div>
+            <p className="text-xs text-muted-foreground">
+              CEO: {formatCurrency(ceoTotalValue)} | VC: {formatCurrency(vcTotalValue)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Lead Status Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lead Status Distribution</CardTitle>
+            <CardDescription>Current pipeline breakdown by stage</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 pb-0">
+            <ChartContainer
+              config={{
+                outreach: {
+                  label: "Outreach",
+                  color: "hsl(var(--chart-1))",
+                },
+                proposal: {
+                  label: "Proposal",
+                  color: "hsl(var(--chart-2))",
+                },
+                calls: {
+                  label: "Calls", 
+                  color: "hsl(var(--chart-3))",
+                },
+                closed: {
+                  label: "Closed",
+                  color: "hsl(var(--chart-4))",
+                },
+              }}
+              className="mx-auto aspect-square max-h-[250px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Pie
+                    data={statusData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="var(--color-outreach)"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Monthly Performance */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Performance</CardTitle>
+            <CardDescription>Lead conversion funnel over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                leads: {
+                  label: "Total Leads",
+                  color: "hsl(var(--chart-1))",
+                },
+                qualified: {
+                  label: "Qualified",
+                  color: "hsl(var(--chart-2))",
+                },
+                proposals: {
+                  label: "Proposals",
+                  color: "hsl(var(--chart-3))",
+                },
+                closed: {
+                  label: "Closed Won",
+                  color: "hsl(var(--chart-4))",
+                },
+              }}
+              className="h-[200px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={conversionData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="leads"
+                    stroke="var(--color-leads)"
+                    strokeWidth={2}
+                    dot={{ fill: "var(--color-leads)" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="qualified"
+                    stroke="var(--color-qualified)"
+                    strokeWidth={2}
+                    dot={{ fill: "var(--color-qualified)" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="proposals"
+                    stroke="var(--color-proposals)"
+                    strokeWidth={2}
+                    dot={{ fill: "var(--color-proposals)" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="closed"
+                    stroke="var(--color-closed)"
+                    strokeWidth={2}
+                    dot={{ fill: "var(--color-closed)" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Revenue Trends */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue Trends</CardTitle>
+            <CardDescription>CEO vs VC outreach performance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                ceo: {
+                  label: "CEO Outreach",
+                  color: "hsl(var(--chart-1))",
+                },
+                vc: {
+                  label: "VC Outreach", 
+                  color: "hsl(var(--chart-2))",
+                },
+              }}
+              className="h-[200px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueTrends}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="quarter" />
+                  <YAxis />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />}
+                    formatter={(value: any) => [formatCurrency(value), ""]}
+                  />
+                  <Bar dataKey="ceo" fill="var(--color-ceo)" />
+                  <Bar dataKey="vc" fill="var(--color-vc)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Platform Performance */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lead Source Performance</CardTitle>
+            <CardDescription>Revenue generation by platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                revenue: {
+                  label: "Revenue",
+                  color: "hsl(var(--chart-3))",
+                },
+                growth: {
+                  label: "Growth %",
+                  color: "hsl(var(--chart-4))",
+                },
+              }}
+              className="h-[200px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={platformTrends}>
+                  <defs>
+                    <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="platform" />
+                  <YAxis />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />}
+                    formatter={(value: any, name: any) => [
+                      name === "revenue" ? formatCurrency(value) : `${value}%`,
+                      name === "revenue" ? "Revenue" : "Growth"
+                    ]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-revenue)"
+                    fillOpacity={1}
+                    fill="url(#fillRevenue)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Lead Management Tabs */}
       <Tabs defaultValue="ceo" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
