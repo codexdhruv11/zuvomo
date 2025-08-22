@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AddLeadFormProps {
   children?: React.ReactNode;
+  leadData?: LeadFormData;
+  isEdit?: boolean;
 }
 
 interface LeadFormData {
@@ -29,10 +31,10 @@ interface LeadFormData {
   assignedTo: string;
 }
 
-export function AddLeadForm({ children }: AddLeadFormProps) {
+export function AddLeadForm({ children, leadData, isEdit = false }: AddLeadFormProps) {
   const { toast } = useToast();
   const form = useForm<LeadFormData>({
-    defaultValues: {
+    defaultValues: leadData || {
       firstName: "",
       lastName: "",
       email: "",
@@ -50,11 +52,11 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
 
   const onSubmit = (data: LeadFormData) => {
     // Here you would typically send the data to your backend
-    console.log("New lead data:", data);
+    console.log(isEdit ? "Updated lead data:" : "New lead data:", data);
     
     toast({
-      title: "Lead Added Successfully",
-      description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline.`,
+      title: isEdit ? "Lead Updated Successfully" : "Lead Added Successfully",
+      description: `${data.firstName} ${data.lastName} from ${data.company} has been ${isEdit ? 'updated' : 'added to your pipeline'}.`,
     });
 
     form.reset();
@@ -72,9 +74,9 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit Lead' : 'Add New Lead'}</DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new lead to your pipeline.
+            {isEdit ? 'Update the lead details below.' : 'Fill in the details below to add a new lead to your pipeline.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -317,7 +319,7 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
                 Cancel
               </Button>
               <Button type="submit" className="bg-gradient-primary">
-                Add Lead
+                {isEdit ? 'Update Lead' : 'Add Lead'}
               </Button>
             </div>
           </form>

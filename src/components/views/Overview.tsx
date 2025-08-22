@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -213,7 +214,8 @@ export function Overview() {
   ];
 
   // Enhanced lead data with more details
-  const myLeads = [
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [allLeads] = useState([
     {
       id: 1,
       firstName: "Sarah",
@@ -244,7 +246,11 @@ export function Overview() {
       status: "cold",
       score: 45
     }
-  ];
+  ]);
+
+  const myLeads = filterStatus === "All" 
+    ? allLeads 
+    : allLeads.filter(lead => lead.status.toLowerCase() === filterStatus.toLowerCase());
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -346,14 +352,14 @@ export function Overview() {
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="ghost">
                     <Filter className="h-4 w-4 mr-2" />
-                    All
+                    {filterStatus}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>All</DropdownMenuItem>
-                  <DropdownMenuItem>Hot</DropdownMenuItem>
-                  <DropdownMenuItem>Warm</DropdownMenuItem>
-                  <DropdownMenuItem>Cold</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("All")}>All</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("Hot")}>Hot</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("Warm")}>Warm</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("Cold")}>Cold</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button size="sm" variant="ghost">
