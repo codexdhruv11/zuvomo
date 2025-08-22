@@ -26,12 +26,6 @@ import {
 } from "lucide-react";
 import { AddLeadForm } from "@/components/AddLeadForm";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 // Sample lead data with CEO/VC outreach info
@@ -42,8 +36,7 @@ const leadData = [
     company: "TechCorp Inc",
     email: "john.smith@techcorp.com",
     phone: "+1 (555) 123-4567",
-    stage: "proposal",
-    leadStatus: "hot",
+    stage: "qualified",
     source: "website",
     value: 75000,
     probability: 70,
@@ -63,8 +56,7 @@ const leadData = [
     company: "Innovate Solutions",
     email: "sarah.davis@innovate.com",
     phone: "+1 (555) 987-6543",
-    stage: "calls",
-    leadStatus: "hot",
+    stage: "proposal",
     source: "referral",
     value: 120000,
     probability: 85,
@@ -84,8 +76,7 @@ const leadData = [
     company: "Digital Dynamics",
     email: "mike.chen@digital.com",
     phone: "+1 (555) 456-7890",
-    stage: "outreach",
-    leadStatus: "warm",
+    stage: "contacted",
     source: "linkedin",
     value: 45000,
     probability: 30,
@@ -105,8 +96,7 @@ const leadData = [
     company: "Future Systems",
     email: "lisa.r@futuresys.com",
     phone: "+1 (555) 234-5678",
-    stage: "calls",
-    leadStatus: "warm",
+    stage: "negotiation",
     source: "cold-call",
     value: 95000,
     probability: 60,
@@ -126,8 +116,7 @@ const leadData = [
     company: "Smart Industries",
     email: "d.wilson@smart.com",
     phone: "+1 (555) 345-6789",
-    stage: "closed",
-    leadStatus: "hot",
+    stage: "closed-won",
     source: "website",
     value: 85000,
     probability: 100,
@@ -147,8 +136,7 @@ const leadData = [
     company: "Growth Capital",
     email: "emma.t@growthcap.com",
     phone: "+1 (555) 567-8901",
-    stage: "proposal",
-    leadStatus: "hot",
+    stage: "qualified",
     source: "referral",
     value: 150000,
     probability: 75,
@@ -168,8 +156,7 @@ const leadData = [
     company: "NextGen Ventures",
     email: "r.kim@nextgen.com",
     phone: "+1 (555) 678-9012",
-    stage: "outreach",
-    leadStatus: "cold",
+    stage: "contacted",
     source: "linkedin",
     value: 200000,
     probability: 40,
@@ -189,8 +176,7 @@ const leadData = [
     company: "Innovation Labs",
     email: "j.lee@innovlabs.com",
     phone: "+1 (555) 789-0123",
-    stage: "calls",
-    leadStatus: "warm",
+    stage: "proposal",
     source: "website",
     value: 95000,
     probability: 80,
@@ -253,16 +239,13 @@ const sourceData = [
 ];
 
 const stageColors = {
-  "outreach": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  "proposal": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300", 
-  "calls": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  "closed": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-};
-
-const statusColors = {
-  "cold": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
-  "warm": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300", 
-  "hot": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+  "new": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  "contacted": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  "qualified": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  "proposal": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  "negotiation": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  "closed-won": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  "closed-lost": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
 };
 
 export default function LeadManagement() {
@@ -271,7 +254,6 @@ export default function LeadManagement() {
   const [selectedSource, setSelectedSource] = useState("all");
   const [selectedAssignee, setSelectedAssignee] = useState("all");
   const [selectedOutreachType, setSelectedOutreachType] = useState("all");
-  const [selectedLeadStatus, setSelectedLeadStatus] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("last-month");
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
   const [selectedProjectStages, setSelectedProjectStages] = useState<string[]>([]);
@@ -279,13 +261,11 @@ export default function LeadManagement() {
   const [selectedConversionRange, setSelectedConversionRange] = useState("all");
   const [selectedContactStatus, setSelectedContactStatus] = useState<string[]>([]);
   const [selectedProposalStatus, setSelectedProposalStatus] = useState<string[]>([]);
-  const [editingLead, setEditingLead] = useState<number | null>(null);
 
   // Filter options
   const teamMembers = ["Alice Johnson", "Bob Wilson", "Charlie Brown"];
-  const projectStages = ["Outreach", "Proposal", "Calls", "Closed"];
+  const projectStages = ["Discovery", "Demo", "Proposal", "Negotiation", "Implementation"];
   const leadTypes = ["CEO", "VC"];
-  const leadStatuses = ["Cold", "Warm", "Hot"];
   const conversionRanges = [
     { label: "0-25%", value: "0-25" },
     { label: "26-50%", value: "26-50" },
@@ -306,33 +286,34 @@ export default function LeadManagement() {
       const matchesSource = selectedSource === "all" || lead.source === selectedSource;
       const matchesAssignee = selectedAssignee === "all" || lead.assignedTo === selectedAssignee;
       const matchesOutreachType = selectedOutreachType === "all" || lead.outreachType === selectedOutreachType;
-      const matchesLeadStatus = selectedLeadStatus === "all" || lead.leadStatus === selectedLeadStatus;
 
-      return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType && matchesLeadStatus;
+      return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType;
     });
-  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType, selectedLeadStatus]);
+  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType]);
 
   // Calculate metrics
   const totalLeads = leadData.length;
-  const qualifiedLeads = leadData.filter(lead => ["proposal", "calls", "closed"].includes(lead.stage)).length;
+  const qualifiedLeads = leadData.filter(lead => ["qualified", "proposal", "negotiation", "closed-won"].includes(lead.stage)).length;
   const totalValue = leadData.reduce((sum, lead) => sum + lead.value, 0);
   const avgDealSize = totalValue / totalLeads;
-  const conversionRate = (leadData.filter(lead => lead.stage === "closed").length / totalLeads * 100).toFixed(1);
+  const conversionRate = (leadData.filter(lead => lead.stage === "closed-won").length / totalLeads * 100).toFixed(1);
   
   // CEO/VC specific metrics
   const ceoLeads = leadData.filter(lead => lead.outreachType === "CEO");
   const vcLeads = leadData.filter(lead => lead.outreachType === "VC");
-  const ceoConversionRate = (ceoLeads.filter(lead => lead.stage === "closed").length / ceoLeads.length * 100).toFixed(1);
-  const vcConversionRate = (vcLeads.filter(lead => lead.stage === "closed").length / vcLeads.length * 100).toFixed(1);
+  const ceoConversionRate = (ceoLeads.filter(lead => lead.stage === "closed-won").length / ceoLeads.length * 100).toFixed(1);
+  const vcConversionRate = (vcLeads.filter(lead => lead.stage === "closed-won").length / vcLeads.length * 100).toFixed(1);
   const ceoTotalValue = ceoLeads.reduce((sum, lead) => sum + lead.value, 0);
   const vcTotalValue = vcLeads.reduce((sum, lead) => sum + lead.value, 0);
   
   // Status distribution for pie chart
   const statusData = [
-    { name: "Outreach", value: leadData.filter(lead => lead.stage === "outreach").length, color: "hsl(var(--chart-1))" },
-    { name: "Proposal", value: leadData.filter(lead => lead.stage === "proposal").length, color: "hsl(var(--chart-2))" },
-    { name: "Calls", value: leadData.filter(lead => lead.stage === "calls").length, color: "hsl(var(--chart-3))" },
-    { name: "Closed", value: leadData.filter(lead => lead.stage === "closed").length, color: "hsl(var(--chart-4))" }
+    { name: "New", value: leadData.filter(lead => lead.stage === "new").length, color: "hsl(var(--chart-1))" },
+    { name: "Contacted", value: leadData.filter(lead => lead.stage === "contacted").length, color: "hsl(var(--chart-2))" },
+    { name: "Qualified", value: leadData.filter(lead => lead.stage === "qualified").length, color: "hsl(var(--chart-3))" },
+    { name: "Proposal", value: leadData.filter(lead => lead.stage === "proposal").length, color: "hsl(var(--chart-4))" },
+    { name: "Negotiation", value: leadData.filter(lead => lead.stage === "negotiation").length, color: "hsl(var(--chart-5))" },
+    { name: "Closed Won", value: leadData.filter(lead => lead.stage === "closed-won").length, color: "hsl(var(--primary))" }
   ].filter(item => item.value > 0);
 
   const formatCurrency = (amount: number) => {
@@ -345,110 +326,8 @@ export default function LeadManagement() {
   };
 
   const getStageLabel = (stage: string) => {
-    return stage.charAt(0).toUpperCase() + stage.slice(1);
+    return stage.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
-
-  const handleQuickEdit = (leadId: number, field: string, value: string) => {
-    // Here you would update the lead in your data source
-    console.log(`Updating lead ${leadId}: ${field} = ${value}`);
-  };
-
-  const renderLeadCard = (lead: any) => (
-    <div key={lead.id} className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="font-semibold text-foreground">{lead.name}</h3>
-            {/* Quick Edit Stage */}
-            <Select value={lead.stage} onValueChange={(value) => handleQuickEdit(lead.id, 'stage', value)}>
-              <SelectTrigger className="w-32 h-6">
-                <Badge className={stageColors[lead.stage as keyof typeof stageColors]}>
-                  {getStageLabel(lead.stage)}
-                </Badge>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="outreach">Outreach</SelectItem>
-                <SelectItem value="proposal">Proposal</SelectItem>
-                <SelectItem value="calls">Calls</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-            {/* Quick Edit Lead Status */}
-            <Select value={lead.leadStatus} onValueChange={(value) => handleQuickEdit(lead.id, 'leadStatus', value)}>
-              <SelectTrigger className="w-20 h-6">
-                <Badge className={statusColors[lead.leadStatus as keyof typeof statusColors]}>
-                  {lead.leadStatus?.charAt(0).toUpperCase() + lead.leadStatus?.slice(1)}
-                </Badge>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cold">Cold</SelectItem>
-                <SelectItem value="warm">Warm</SelectItem>
-                <SelectItem value="hot">Hot</SelectItem>
-              </SelectContent>
-            </Select>
-            <Badge variant="outline" className={lead.outreachType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
-              {lead.outreachType}
-            </Badge>
-            <span className="text-sm text-muted-foreground">• {lead.company}</span>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-            <div className="flex items-center gap-1">
-              <Mail className="h-3 w-3" />
-              {lead.email}
-            </div>
-            <div className="flex items-center gap-1">
-              <Phone className="h-3 w-3" />
-              {lead.phone}
-            </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Last contact: {lead.lastContact}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-            <div>
-              <span className="font-medium text-foreground">Responsibility:</span>
-              <p className="text-muted-foreground">{lead.responsibility}</p>
-            </div>
-            <div>
-              <span className="font-medium text-foreground">Next Action:</span>
-              <p className="text-muted-foreground">{lead.nextAction}</p>
-            </div>
-            <div>
-              <span className="font-medium text-foreground">Assigned to:</span>
-              <p className="text-muted-foreground">{lead.assignedTo}</p>
-            </div>
-          </div>
-          <div className="mt-2">
-            <span className="font-medium text-foreground">Recommendations:</span>
-            <p className="text-sm text-muted-foreground">{lead.recommendations}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <div className="font-semibold text-foreground">{formatCurrency(lead.value)}</div>
-            <div className="text-sm text-muted-foreground">{lead.probability}% probability</div>
-          </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="sm">
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setEditingLead(lead.id)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      {lead.notes && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          <strong>Notes:</strong> {lead.notes}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="space-y-6 p-6">
@@ -459,20 +338,6 @@ export default function LeadManagement() {
           <p className="text-muted-foreground">Track and manage your sales pipeline</p>
         </div>
         <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Lead Status
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setSelectedLeadStatus("all")}>All</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedLeadStatus("hot")}>Hot</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedLeadStatus("warm")}>Warm</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedLeadStatus("cold")}>Cold</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -490,57 +355,191 @@ export default function LeadManagement() {
         </div>
       </div>
 
-      {/* Comparison Top Bar */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Performance Comparison</CardTitle>
-            <div className="flex gap-2">
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Compare Period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last-month">This vs Last Month</SelectItem>
-                  <SelectItem value="last-quarter">This vs Last Quarter</SelectItem>
-                  <SelectItem value="year-over-year">Year over Year</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Compare Teams
-              </Button>
-            </div>
+      {/* Date Range and Filters */}
+      <div className="space-y-4 mb-6">
+        {/* Date Range Dropdown */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select date range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="last-week">Last Week</SelectItem>
+                <SelectItem value="last-month">Last Month</SelectItem>
+                <SelectItem value="last-12-months">Last 12 Months</SelectItem>
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="text-center p-4 bg-accent/50 rounded-lg">
-              <div className="text-2xl font-bold text-foreground">+24%</div>
-              <div className="text-sm text-muted-foreground">Lead Growth</div>
-              <div className="text-xs text-green-600 dark:text-green-400">vs last month</div>
-            </div>
-            <div className="text-center p-4 bg-accent/50 rounded-lg">
-              <div className="text-2xl font-bold text-foreground">CEO: 68%</div>
-              <div className="text-sm text-muted-foreground">vs VC: 72%</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">Conversion Rate</div>
-            </div>
-            <div className="text-center p-4 bg-accent/50 rounded-lg">
-              <div className="text-2xl font-bold text-foreground">${formatCurrency(ceoTotalValue - vcTotalValue).slice(1)}</div>
-              <div className="text-sm text-muted-foreground">CEO vs VC Gap</div>
-              <div className="text-xs text-orange-600 dark:text-orange-400">Pipeline Value</div>
-            </div>
-            <div className="text-center p-4 bg-accent/50 rounded-lg">
-              <div className="text-2xl font-bold text-foreground">18 days</div>
-              <div className="text-sm text-muted-foreground">Avg. Cycle Time</div>
-              <div className="text-xs text-purple-600 dark:text-purple-400">Lead to Close</div>
-            </div>
+        </div>
+
+        {/* Dropdown Filters */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {/* Team Members Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Team Members
+            </label>
+            <Select value={selectedTeamMembers[0] || "all"} onValueChange={(value) => setSelectedTeamMembers(value === "all" ? [] : [value])}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Members" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Members</SelectItem>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member} value={member}>{member}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Project Stage Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Project Stage
+            </label>
+            <Select value={selectedProjectStages[0] || "all"} onValueChange={(value) => setSelectedProjectStages(value === "all" ? [] : [value])}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                {projectStages.map((stage) => (
+                  <SelectItem key={stage} value={stage}>{stage}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Lead Type Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Lead Type
+            </label>
+            <Select value={selectedLeadTypes[0] || "all"} onValueChange={(value) => setSelectedLeadTypes(value === "all" ? [] : [value])}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {leadTypes.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Conversion % Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <PieChartIcon className="h-4 w-4" />
+              Conversion %
+            </label>
+            <Select value={selectedConversionRange} onValueChange={setSelectedConversionRange}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Ranges" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ranges</SelectItem>
+                {conversionRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Contact Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              Contact Status
+            </label>
+            <Select value={selectedContactStatus[0] || "all"} onValueChange={(value) => setSelectedContactStatus(value === "all" ? [] : [value])}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                {contactStatuses.map((status) => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Proposals Sent Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Proposals Sent
+            </label>
+            <Select value={selectedProposalStatus[0] || "all"} onValueChange={(value) => setSelectedProposalStatus(value === "all" ? [] : [value])}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Proposals" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Proposals</SelectItem>
+                {proposalStatuses.map((status) => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* CEO/VC Outreach Tiles */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">CEO Outreach</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{ceoLeads.length}</div>
+            <p className="text-xs text-muted-foreground">Total CEO Contacts</p>
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Conversion Rate:</span>
+                <span className="font-medium">{ceoConversionRate}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Pipeline Value:</span>
+                <span className="font-medium">{formatCurrency(ceoTotalValue)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">VC Outreach</CardTitle>
+            <TrendingUp className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{vcLeads.length}</div>
+            <p className="text-xs text-muted-foreground">Total VC Contacts</p>
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Conversion Rate:</span>
+                <span className="font-medium">{vcConversionRate}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Pipeline Value:</span>
+                <span className="font-medium">{formatCurrency(vcTotalValue)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
@@ -548,11 +547,21 @@ export default function LeadManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalLeads}</div>
-            <p className="text-xs text-muted-foreground">
-              {qualifiedLeads} qualified leads
-            </p>
+            <p className="text-xs text-muted-foreground">+12% from last month</p>
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Qualified Leads</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{qualifiedLeads}</div>
+            <p className="text-xs text-muted-foreground">+5% from last month</p>
+          </CardContent>
+        </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pipeline Value</CardTitle>
@@ -560,376 +569,379 @@ export default function LeadManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
-            <p className="text-xs text-muted-foreground">
-              Avg: {formatCurrency(avgDealSize)}
-            </p>
+            <p className="text-xs text-muted-foreground">+18% from last month</p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{conversionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              CEO: {ceoConversionRate}% | VC: {vcConversionRate}%
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue Split</CardTitle>
-            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(ceoTotalValue + vcTotalValue)}</div>
-            <p className="text-xs text-muted-foreground">
-              CEO: {formatCurrency(ceoTotalValue)} | VC: {formatCurrency(vcTotalValue)}
-            </p>
+            <p className="text-xs text-muted-foreground">+2.1% from last month</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Lead Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Status Distribution</CardTitle>
-            <CardDescription>Current pipeline breakdown by stage</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 pb-0">
-            <ChartContainer
-              config={{
-                outreach: {
-                  label: "Outreach",
-                  color: "hsl(var(--chart-1))",
-                },
-                proposal: {
-                  label: "Proposal",
-                  color: "hsl(var(--chart-2))",
-                },
-                calls: {
-                  label: "Calls", 
-                  color: "hsl(var(--chart-3))",
-                },
-                closed: {
-                  label: "Closed",
-                  color: "hsl(var(--chart-4))",
-                },
-              }}
-              className="mx-auto aspect-square max-h-[250px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Pie
-                    data={statusData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="var(--color-outreach)"
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+      {/* Visual Trends */}
+      <div className="space-y-8">
+        <h2 className="text-2xl font-bold text-foreground">Visual Analytics</h2>
+        
+        {/* Two-column layout for charts with proper spacing */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Monthly Trends */}
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-primary">Monthly Trends</CardTitle>
+              <CardDescription>Revenue, leads, and conversion trends over time</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    revenue: { label: "Revenue", color: "hsl(var(--primary))" },
+                    leads: { label: "Leads", color: "hsl(var(--chart-2))" },
+                    conversions: { label: "Conversions", color: "hsl(var(--chart-3))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Area type="monotone" dataKey="revenue" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="leads" stackId="2" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="conversions" stackId="3" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.6} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Monthly Performance */}
+          {/* Platform Trends */}
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-primary">Platform Performance</CardTitle>
+              <CardDescription>Lead generation and revenue by platform</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    leads: { label: "Leads", color: "hsl(var(--primary))" },
+                    revenue: { label: "Revenue", color: "hsl(var(--accent))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={platformTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="platform" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="leads" fill="hsl(var(--primary))" />
+                      <Bar dataKey="revenue" fill="hsl(var(--accent))" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Revenue Trends */}
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-primary">Revenue Trends by Lead Type</CardTitle>
+              <CardDescription>CEO vs VC revenue performance over quarters</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px]">
+                <ChartContainer
+                  config={{
+                    ceo: { label: "CEO Revenue", color: "hsl(var(--primary))" },
+                    vc: { label: "VC Revenue", color: "hsl(var(--accent))" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={revenueTrends} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="quarter" className="text-muted-foreground" />
+                      <YAxis className="text-muted-foreground" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line type="monotone" dataKey="ceo" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: "hsl(var(--primary))" }} />
+                      <Line type="monotone" dataKey="vc" stroke="hsl(var(--accent))" strokeWidth={3} dot={{ fill: "hsl(var(--accent))" }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lead Status Distribution */}
+          <Card className="bg-gradient-card min-h-[500px]">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-primary">Lead Status Distribution</CardTitle>
+              <CardDescription>Current status of all leads in pipeline</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="w-full h-[400px] flex items-center justify-center">
+                <ChartContainer
+                  config={{
+                    value: { label: "Leads" }
+                  }}
+                  className="w-full h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--accent))"} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Performance</CardTitle>
-            <CardDescription>Lead conversion funnel over time</CardDescription>
+            <CardTitle>Lead Conversion Funnel</CardTitle>
+            <CardDescription>Monthly lead progression through pipeline stages</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                leads: {
-                  label: "Total Leads",
-                  color: "hsl(var(--chart-1))",
-                },
-                qualified: {
-                  label: "Qualified",
-                  color: "hsl(var(--chart-2))",
-                },
-                proposals: {
-                  label: "Proposals",
-                  color: "hsl(var(--chart-3))",
-                },
-                closed: {
-                  label: "Closed Won",
-                  color: "hsl(var(--chart-4))",
-                },
+                leads: { label: "Leads", color: "hsl(var(--chart-1))" },
+                qualified: { label: "Qualified", color: "hsl(var(--chart-2))" },
+                proposals: { label: "Proposals", color: "hsl(var(--chart-3))" },
+                closed: { label: "Closed", color: "hsl(var(--chart-4))" }
               }}
-              className="h-[200px]"
+              className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={conversionData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="month" className="text-muted-foreground" />
+                  <YAxis className="text-muted-foreground" />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line
-                    type="monotone"
-                    dataKey="leads"
-                    stroke="var(--color-leads)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--color-leads)" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="qualified"
-                    stroke="var(--color-qualified)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--color-qualified)" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="proposals"
-                    stroke="var(--color-proposals)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--color-proposals)" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="closed"
-                    stroke="var(--color-closed)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--color-closed)" }}
-                  />
+                  <Line type="monotone" dataKey="leads" stroke="hsl(var(--chart-1))" strokeWidth={2} />
+                  <Line type="monotone" dataKey="qualified" stroke="hsl(var(--chart-2))" strokeWidth={2} />
+                  <Line type="monotone" dataKey="proposals" stroke="hsl(var(--chart-3))" strokeWidth={2} />
+                  <Line type="monotone" dataKey="closed" stroke="hsl(var(--chart-4))" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
 
-        {/* Revenue Trends */}
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Trends</CardTitle>
-            <CardDescription>CEO vs VC outreach performance</CardDescription>
+            <CardTitle>Lead Status Distribution</CardTitle>
+            <CardDescription>Current status of all leads in pipeline</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                ceo: {
-                  label: "CEO Outreach",
-                  color: "hsl(var(--chart-1))",
-                },
-                vc: {
-                  label: "VC Outreach", 
-                  color: "hsl(var(--chart-2))",
-                },
+                value: { label: "Leads" }
               }}
-              className="h-[200px]"
+              className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueTrends}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="quarter" />
-                  <YAxis />
-                  <ChartTooltip 
-                    content={<ChartTooltipContent />}
-                    formatter={(value: any) => [formatCurrency(value), ""]}
-                  />
-                  <Bar dataKey="ceo" fill="var(--color-ceo)" />
-                  <Bar dataKey="vc" fill="var(--color-vc)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Platform Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Source Performance</CardTitle>
-            <CardDescription>Revenue generation by platform</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                revenue: {
-                  label: "Revenue",
-                  color: "hsl(var(--chart-3))",
-                },
-                growth: {
-                  label: "Growth %",
-                  color: "hsl(var(--chart-4))",
-                },
-              }}
-              className="h-[200px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={platformTrends}>
-                  <defs>
-                    <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="platform" />
-                  <YAxis />
-                  <ChartTooltip 
-                    content={<ChartTooltipContent />}
-                    formatter={(value: any, name: any) => [
-                      name === "revenue" ? formatCurrency(value) : `${value}%`,
-                      name === "revenue" ? "Revenue" : "Growth"
-                    ]}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="var(--color-revenue)"
-                    fillOpacity={1}
-                    fill="url(#fillRevenue)"
-                  />
-                </AreaChart>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={120}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* Lead Management Tabs */}
-      <Tabs defaultValue="ceo" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="ceo">CEO Lead Management</TabsTrigger>
-          <TabsTrigger value="vc">VC Lead Management</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="ceo" className="space-y-6">
-          {/* CEO Lead Database */}
-          <Card>
-            <CardHeader>
-              <CardTitle>CEO Lead Database</CardTitle>
-              <CardDescription>Manage and track all your CEO leads</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search leads, companies, or emails..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Lead Database</CardTitle>
+          <CardDescription>Manage and track all your leads</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search leads, companies, or emails..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={selectedStage} onValueChange={setSelectedStage}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="qualified">Qualified</SelectItem>
+                <SelectItem value="proposal">Proposal</SelectItem>
+                <SelectItem value="negotiation">Negotiation</SelectItem>
+                <SelectItem value="closed-won">Closed Won</SelectItem>
+                <SelectItem value="closed-lost">Closed Lost</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedSource} onValueChange={setSelectedSource}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="website">Website</SelectItem>
+                <SelectItem value="referral">Referral</SelectItem>
+                <SelectItem value="linkedin">LinkedIn</SelectItem>
+                <SelectItem value="cold-call">Cold Call</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedOutreachType} onValueChange={setSelectedOutreachType}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="CEO">CEO</SelectItem>
+                <SelectItem value="VC">VC</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Team Member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Team Members</SelectItem>
+                <SelectItem value="Alice Johnson">Alice Johnson</SelectItem>
+                <SelectItem value="Bob Wilson">Bob Wilson</SelectItem>
+                <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Leads Table */}
+          <div className="space-y-4">
+            {filteredLeads.map((lead) => (
+              <div key={lead.id} className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-foreground">{lead.name}</h3>
+                      <Badge className={stageColors[lead.stage as keyof typeof stageColors]}>
+                        {getStageLabel(lead.stage)}
+                      </Badge>
+                      <Badge variant="outline" className={lead.outreachType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
+                        {lead.outreachType}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">• {lead.company}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {lead.email}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {lead.phone}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Last contact: {lead.lastContact}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium text-foreground">Responsibility:</span>
+                        <p className="text-muted-foreground">{lead.responsibility}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground">Next Action:</span>
+                        <p className="text-muted-foreground">{lead.nextAction}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground">Assigned to:</span>
+                        <p className="text-muted-foreground">{lead.assignedTo}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-medium text-foreground">Recommendations:</span>
+                      <p className="text-sm text-muted-foreground">{lead.recommendations}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="font-semibold text-foreground">{formatCurrency(lead.value)}</div>
+                      <div className="text-sm text-muted-foreground">{lead.probability}% probability</div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <Select value={selectedStage} onValueChange={setSelectedStage}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Stage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Stages</SelectItem>
-                    <SelectItem value="outreach">Outreach</SelectItem>
-                    <SelectItem value="proposal">Proposal</SelectItem>
-                    <SelectItem value="calls">Calls</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={selectedSource} onValueChange={setSelectedSource}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Source" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sources</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="referral">Referral</SelectItem>
-                    <SelectItem value="linkedin">LinkedIn</SelectItem>
-                    <SelectItem value="cold-call">Cold Call</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* CEO Leads */}
-              <div className="space-y-4">
-                {filteredLeads.filter(lead => lead.outreachType === "CEO").map(renderLeadCard)}
-              </div>
-
-              {filteredLeads.filter(lead => lead.outreachType === "CEO").length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No CEO leads found matching your criteria.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vc" className="space-y-6">
-          {/* VC Lead Database */}
-          <Card>
-            <CardHeader>
-              <CardTitle>VC Lead Database</CardTitle>
-              <CardDescription>Manage and track all your VC leads</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search leads, companies, or emails..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+                {lead.notes && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    <strong>Notes:</strong> {lead.notes}
                   </div>
-                </div>
-                <Select value={selectedStage} onValueChange={setSelectedStage}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Stage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Stages</SelectItem>
-                    <SelectItem value="outreach">Outreach</SelectItem>
-                    <SelectItem value="proposal">Proposal</SelectItem>
-                    <SelectItem value="calls">Calls</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={selectedSource} onValueChange={setSelectedSource}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Source" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sources</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="referral">Referral</SelectItem>
-                    <SelectItem value="linkedin">LinkedIn</SelectItem>
-                    <SelectItem value="cold-call">Cold Call</SelectItem>
-                  </SelectContent>
-                </Select>
+                )}
               </div>
+            ))}
+          </div>
 
-              {/* VC Leads */}
-              <div className="space-y-4">
-                {filteredLeads.filter(lead => lead.outreachType === "VC").map(renderLeadCard)}
-              </div>
-
-              {filteredLeads.filter(lead => lead.outreachType === "VC").length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No VC leads found matching your criteria.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {filteredLeads.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No leads found matching your criteria.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
