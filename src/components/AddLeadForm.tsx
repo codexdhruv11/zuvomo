@@ -22,7 +22,9 @@ interface LeadFormData {
   company: string;
   position: string;
   leadType: string;
+  leadStatus: string;
   source: string;
+  stage: string;
   value: string;
   notes: string;
   assignedTo: string;
@@ -39,7 +41,9 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
       company: "",
       position: "",
       leadType: "",
+      leadStatus: "",
       source: "",
+      stage: "",
       value: "",
       notes: "",
       assignedTo: ""
@@ -204,6 +208,31 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
               
               <FormField
                 control={form.control}
+                name="leadStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lead Status (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select lead status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cold">Cold</SelectItem>
+                        <SelectItem value="warm">Warm</SelectItem>
+                        <SelectItem value="hot">Hot</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="source"
                 rules={{ required: "Source is required" }}
                 render={({ field }) => (
@@ -221,6 +250,30 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
                         <SelectItem value="referral">Referral</SelectItem>
                         <SelectItem value="cold-call">Cold Call</SelectItem>
                         <SelectItem value="event">Event</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="stage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stage (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select stage" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="outreach">Outreach</SelectItem>
+                        <SelectItem value="proposal">Proposal</SelectItem>
+                        <SelectItem value="calls">Calls</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
