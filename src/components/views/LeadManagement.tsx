@@ -43,6 +43,8 @@ const leadData = [
     email: "john.smith@techcorp.com",
     phone: "+1 (555) 123-4567",
     stage: "qualified",
+    leadStatus: "warm",
+    projectStage: "Proposal",
     source: "website",
     value: 75000,
     probability: 70,
@@ -63,6 +65,8 @@ const leadData = [
     email: "sarah.davis@innovate.com",
     phone: "+1 (555) 987-6543",
     stage: "proposal",
+    leadStatus: "hot",
+    projectStage: "Calls",
     source: "referral",
     value: 120000,
     probability: 85,
@@ -83,6 +87,8 @@ const leadData = [
     email: "mike.chen@digital.com",
     phone: "+1 (555) 456-7890",
     stage: "contacted",
+    leadStatus: "cold",
+    projectStage: "Outreach",
     source: "linkedin",
     value: 45000,
     probability: 30,
@@ -103,6 +109,8 @@ const leadData = [
     email: "lisa.r@futuresys.com",
     phone: "+1 (555) 234-5678",
     stage: "negotiation",
+    leadStatus: "hot",
+    projectStage: "Calls",
     source: "cold-call",
     value: 95000,
     probability: 60,
@@ -123,6 +131,8 @@ const leadData = [
     email: "d.wilson@smart.com",
     phone: "+1 (555) 345-6789",
     stage: "closed-won",
+    leadStatus: "hot",
+    projectStage: "Closed",
     source: "website",
     value: 85000,
     probability: 100,
@@ -143,6 +153,8 @@ const leadData = [
     email: "emma.t@growthcap.com",
     phone: "+1 (555) 567-8901",
     stage: "qualified",
+    leadStatus: "warm",
+    projectStage: "Proposal",
     source: "referral",
     value: 150000,
     probability: 75,
@@ -163,6 +175,8 @@ const leadData = [
     email: "r.kim@nextgen.com",
     phone: "+1 (555) 678-9012",
     stage: "contacted",
+    leadStatus: "cold",
+    projectStage: "Outreach",
     source: "linkedin",
     value: 200000,
     probability: 40,
@@ -183,6 +197,8 @@ const leadData = [
     email: "j.lee@innovlabs.com",
     phone: "+1 (555) 789-0123",
     stage: "proposal",
+    leadStatus: "warm",
+    projectStage: "Proposal",
     source: "website",
     value: 95000,
     probability: 80,
@@ -246,12 +262,21 @@ const sourceData = [
 
 const stageColors = {
   "new": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  "contacted": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  "contacted": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300", 
   "qualified": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   "proposal": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
   "negotiation": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
   "closed-won": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  "closed-lost": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+  "closed-lost": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+  "outreach": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  "calls": "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+  "closed": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+};
+
+const statusColors = {
+  "cold": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  "warm": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  "hot": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
 };
 
 export default function LeadManagement() {
@@ -270,7 +295,7 @@ export default function LeadManagement() {
 
   // Filter options
   const teamMembers = ["Alice Johnson", "Bob Wilson", "Charlie Brown"];
-  const projectStages = ["Discovery", "Demo", "Proposal", "Negotiation", "Implementation"];
+  const projectStages = ["Outreach", "Proposal", "Calls", "Closed"];
   const leadTypes = ["CEO", "VC"];
   const conversionRanges = [
     { label: "0-25%", value: "0-25" },
@@ -835,13 +860,10 @@ export default function LeadManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Stages</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
+                <SelectItem value="outreach">Outreach</SelectItem>
                 <SelectItem value="proposal">Proposal</SelectItem>
-                <SelectItem value="negotiation">Negotiation</SelectItem>
-                <SelectItem value="closed-won">Closed Won</SelectItem>
-                <SelectItem value="closed-lost">Closed Lost</SelectItem>
+                <SelectItem value="calls">Calls</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
               </SelectContent>
             </Select>
             <Select value={selectedSource} onValueChange={setSelectedSource}>
@@ -893,6 +915,12 @@ export default function LeadManagement() {
                       <Badge variant="outline" className={lead.outreachType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
                         {lead.outreachType}
                       </Badge>
+                      <Badge className={statusColors[lead.leadStatus as keyof typeof statusColors]}>
+                        {lead.leadStatus?.charAt(0).toUpperCase() + lead.leadStatus?.slice(1)}
+                      </Badge>
+                      <Badge variant="outline" className="border-gray-400 text-gray-600">
+                        {lead.projectStage}
+                      </Badge>
                       <span className="text-sm text-muted-foreground">• {lead.company}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
@@ -928,23 +956,52 @@ export default function LeadManagement() {
                       <p className="text-sm text-muted-foreground">{lead.recommendations}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="font-semibold text-foreground">{formatCurrency(lead.value)}</div>
-                      <div className="text-sm text-muted-foreground">{lead.probability}% probability</div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="font-semibold text-foreground">{formatCurrency(lead.value)}</div>
+                        <div className="text-sm text-muted-foreground">{lead.probability}% probability</div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex gap-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-xs">
+                                Status: {lead.leadStatus?.charAt(0).toUpperCase() + lead.leadStatus?.slice(1)}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-popover border border-border shadow-md">
+                              <DropdownMenuItem onClick={() => console.log('Update status to cold')}>Cold</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Update status to warm')}>Warm</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Update status to hot')}>Hot</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-xs">
+                                Stage: {lead.projectStage}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-popover border border-border shadow-md">
+                              <DropdownMenuItem onClick={() => console.log('Update stage to outreach')}>Outreach</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Update stage to proposal')}>Proposal</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Update stage to calls')}>Calls</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Update stage to closed')}>Closed</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
                 </div>
                 {lead.notes && (
                   <div className="mt-2 text-sm text-muted-foreground">

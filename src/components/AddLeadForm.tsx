@@ -22,6 +22,7 @@ interface LeadFormData {
   company: string;
   position: string;
   leadType: string;
+  leadStatus?: string;
   source: string;
   value: string;
   notes: string;
@@ -39,6 +40,7 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
       company: "",
       position: "",
       leadType: "",
+      leadStatus: "",
       source: "",
       value: "",
       notes: "",
@@ -178,7 +180,7 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="leadType"
@@ -195,6 +197,29 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
                       <SelectContent>
                         <SelectItem value="CEO">CEO</SelectItem>
                         <SelectItem value="VC">VC</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="leadStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lead Status (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select lead status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cold">Cold</SelectItem>
+                        <SelectItem value="warm">Warm</SelectItem>
+                        <SelectItem value="hot">Hot</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
