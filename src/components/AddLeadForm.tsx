@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { googleSheetsService } from "@/services/googleSheets";
 
 interface AddLeadFormProps {
   children?: React.ReactNode;
@@ -48,16 +49,42 @@ export function AddLeadForm({ children }: AddLeadFormProps) {
     }
   });
 
-  const onSubmit = (data: LeadFormData) => {
-    // Here you would typically send the data to your backend
-    console.log("New lead data:", data);
-    
-    toast({
-      title: "Lead Added Successfully",
-      description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline.`,
-    });
+  const onSubmit = async (data: LeadFormData) => {
+    try {
+      // Prepare lead data for Google Sheets
+      const leadData = {
+        name: `${data.firstName} ${data.lastName}`,
+        company: data.company,
+        email: data.email,
+        phone: data.phone,
+        stage: 'new',
+        leadStatus: data.leadStatus || 'cold',
+        projectStage: 'Outreach',
+        source: data.source,
+        value: parseFloat(data.value) || 0,
+        assignedTo: data.assignedTo,
+        notes: data.notes,
+        lastContact: new Date().toISOString().split('T')[0],
+        contactType: data.leadType
+      };
 
-    form.reset();
+      // Add to Google Sheets
+      await googleSheetsService.addLead(leadData);
+      
+      toast({
+        title: "Lead Added Successfully",
+        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline and synced to Google Sheets.`,
+      });
+
+      form.reset();
+    } catch (error) {
+      console.error('Failed to add lead:', error);
+      toast({
+        title: "Error Adding Lead",
+        description: "Failed to add lead to Google Sheets. Please check your connection and try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
