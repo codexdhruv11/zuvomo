@@ -26,6 +26,9 @@ import {
 const menuItems = [
   { id: "overview", title: "Overview", icon: Home },
   { id: "leads", title: "Lead Management", icon: Target },
+  { id: "ceo-outreach", title: "CEO Outreach", icon: Target },
+  { id: "vc-outreach", title: "VC Outreach", icon: Target },
+  { id: "partner-outreach", title: "Partner Outreach", icon: Target },
   { id: "contacts", title: "Contacts", icon: Users },
   { id: "analytics", title: "Analytics", icon: BarChart3 },
   { id: "reports", title: "Reports", icon: FileText },

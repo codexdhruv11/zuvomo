@@ -2,39 +2,32 @@ import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { googleSheetsService } from "@/services/googleSheets";
 
-interface AddLeadFormProps {
+interface AddContactFormProps {
   children?: React.ReactNode;
-  editLead?: any;
-  onClose?: () => void;
 }
 
-interface LeadFormData {
+interface ContactFormData {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   company: string;
   position: string;
-  leadType: string;
-  leadStatus?: string;
-  source: string;
-  value: string;
+  contactType: string;
+  industry: string;
   notes: string;
-  assignedTo: string;
 }
 
-export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
+export function AddContactForm({ children }: AddContactFormProps) {
   const { toast } = useToast();
-  const form = useForm<LeadFormData>({
+  const form = useForm<ContactFormData>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -42,48 +35,27 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
       phone: "",
       company: "",
       position: "",
-      leadType: "",
-      leadStatus: "",
-      source: "",
-      value: "",
-      notes: "",
-      assignedTo: ""
+      contactType: "",
+      industry: "",
+      notes: ""
     }
   });
 
-  const onSubmit = async (data: LeadFormData) => {
+  const onSubmit = async (data: ContactFormData) => {
     try {
-      // Prepare lead data for Google Sheets
-      const leadData = {
-        name: `${data.firstName} ${data.lastName}`,
-        company: data.company,
-        email: data.email,
-        phone: data.phone,
-        stage: 'new',
-        leadStatus: data.leadStatus || 'cold',
-        projectStage: 'Outreach',
-        source: data.source,
-        value: parseFloat(data.value) || 0,
-        assignedTo: data.assignedTo,
-        notes: data.notes,
-        lastContact: new Date().toISOString().split('T')[0],
-        contactType: data.leadType
-      };
-
-      // Add to Google Sheets
-      await googleSheetsService.addLead(leadData);
+      console.log('Contact data:', data);
       
       toast({
-        title: "Lead Added Successfully",
-        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline and synced to Google Sheets.`,
+        title: "Contact Added Successfully",
+        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your contacts.`,
       });
 
       form.reset();
     } catch (error) {
-      console.error('Failed to add lead:', error);
+      console.error('Failed to add contact:', error);
       toast({
-        title: "Error Adding Lead",
-        description: "Failed to add lead to Google Sheets. Please check your connection and try again.",
+        title: "Error Adding Contact",
+        description: "Failed to add contact. Please try again.",
         variant: "destructive",
       });
     }
@@ -95,15 +67,15 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
         {children || (
           <Button className="bg-gradient-primary">
             <Plus className="h-4 w-4 mr-2" />
-            Add Lead
+            Add Contact
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle>Add New Contact</DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new lead to your pipeline.
+            Fill in the details below to add a new contact to your directory.
           </DialogDescription>
         </DialogHeader>
         
@@ -209,91 +181,28 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="leadType"
-                rules={{ required: "Lead type is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Lead Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select lead type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="CEO">CEO</SelectItem>
-                        <SelectItem value="VC">VC</SelectItem>
-                        <SelectItem value="Partner">Partner</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="leadStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Lead Status (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select lead status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="cold">Cold</SelectItem>
-                        <SelectItem value="warm">Warm</SelectItem>
-                        <SelectItem value="hot">Hot</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="source"
-                rules={{ required: "Source is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Source</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select source" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="website">Website</SelectItem>
-                        <SelectItem value="linkedin">LinkedIn</SelectItem>
-                        <SelectItem value="referral">Referral</SelectItem>
-                        <SelectItem value="cold-call">Cold Call</SelectItem>
-                        <SelectItem value="event">Event</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="value"
+                name="contactType"
+                rules={{ required: "Contact type is required" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estimated Value ($)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="50000" {...field} />
-                    </FormControl>
+                    <FormLabel>Contact Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select contact type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="client">Client</SelectItem>
+                        <SelectItem value="prospect">Prospect</SelectItem>
+                        <SelectItem value="partner">Partner</SelectItem>
+                        <SelectItem value="vendor">Vendor</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -301,21 +210,23 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
               
               <FormField
                 control={form.control}
-                name="assignedTo"
-                rules={{ required: "Assignment is required" }}
+                name="industry"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assign To</FormLabel>
+                    <FormLabel>Industry</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select team member" />
+                          <SelectValue placeholder="Select industry" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Alice Johnson">Alice Johnson</SelectItem>
-                        <SelectItem value="Bob Wilson">Bob Wilson</SelectItem>
-                        <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
+                        <SelectItem value="technology">Technology</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="healthcare">Healthcare</SelectItem>
+                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -332,7 +243,7 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Additional notes about this lead..."
+                      placeholder="Additional notes about this contact..."
                       className="min-h-[100px]"
                       {...field} 
                     />
@@ -347,7 +258,7 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
                 Cancel
               </Button>
               <Button type="submit" className="bg-gradient-primary">
-                Add Lead
+                Add Contact
               </Button>
             </div>
           </form>

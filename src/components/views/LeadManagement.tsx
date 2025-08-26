@@ -292,11 +292,13 @@ export default function LeadManagement() {
   const [selectedConversionRange, setSelectedConversionRange] = useState("all");
   const [selectedContactStatus, setSelectedContactStatus] = useState<string[]>([]);
   const [selectedProposalStatus, setSelectedProposalStatus] = useState<string[]>([]);
+  const [selectedLeadStatus, setSelectedLeadStatus] = useState("all");
+  const [editingLead, setEditingLead] = useState<any>(null);
 
   // Filter options
   const teamMembers = ["Alice Johnson", "Bob Wilson", "Charlie Brown"];
   const projectStages = ["Outreach", "Proposal", "Calls", "Closed"];
-  const leadTypes = ["CEO", "VC"];
+  const leadTypes = ["CEO", "VC", "Partner"];
   const conversionRanges = [
     { label: "0-25%", value: "0-25" },
     { label: "26-50%", value: "26-50" },
@@ -317,10 +319,11 @@ export default function LeadManagement() {
       const matchesSource = selectedSource === "all" || lead.source === selectedSource;
       const matchesAssignee = selectedAssignee === "all" || lead.assignedTo === selectedAssignee;
       const matchesOutreachType = selectedOutreachType === "all" || lead.outreachType === selectedOutreachType;
+      const matchesLeadStatus = selectedLeadStatus === "all" || lead.leadStatus === selectedLeadStatus;
 
-      return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType;
+      return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType && matchesLeadStatus;
     });
-  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType]);
+  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType, selectedLeadStatus]);
 
   // Calculate metrics
   const totalLeads = leadData.length;
@@ -369,20 +372,17 @@ export default function LeadManagement() {
           <p className="text-muted-foreground">Track and manage your sales pipeline</p>
         </div>
         <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Lead Status
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>All</DropdownMenuItem>
-              <DropdownMenuItem>Hot</DropdownMenuItem>
-              <DropdownMenuItem>Warm</DropdownMenuItem>
-              <DropdownMenuItem>Cold</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Select value={selectedLeadStatus} onValueChange={setSelectedLeadStatus}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Lead Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="hot">Hot</SelectItem>
+              <SelectItem value="warm">Warm</SelectItem>
+              <SelectItem value="cold">Cold</SelectItem>
+            </SelectContent>
+          </Select>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -391,7 +391,7 @@ export default function LeadManagement() {
             <Upload className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <AddLeadForm>
+          <AddLeadForm editLead={editingLead} onClose={() => setEditingLead(null)}>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Lead
@@ -767,73 +767,6 @@ export default function LeadManagement() {
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Conversion Funnel</CardTitle>
-            <CardDescription>Monthly lead progression through pipeline stages</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                leads: { label: "Leads", color: "hsl(var(--chart-1))" },
-                qualified: { label: "Qualified", color: "hsl(var(--chart-2))" },
-                proposals: { label: "Proposals", color: "hsl(var(--chart-3))" },
-                closed: { label: "Closed", color: "hsl(var(--chart-4))" }
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={conversionData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="month" className="text-muted-foreground" />
-                  <YAxis className="text-muted-foreground" />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="leads" stroke="hsl(var(--chart-1))" strokeWidth={2} />
-                  <Line type="monotone" dataKey="qualified" stroke="hsl(var(--chart-2))" strokeWidth={2} />
-                  <Line type="monotone" dataKey="proposals" stroke="hsl(var(--chart-3))" strokeWidth={2} />
-                  <Line type="monotone" dataKey="closed" stroke="hsl(var(--chart-4))" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Status Distribution</CardTitle>
-            <CardDescription>Current status of all leads in pipeline</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                value: { label: "Leads" }
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Filters and Search */}
       <Card>
@@ -993,7 +926,7 @@ export default function LeadManagement() {
                           <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                           <Button variant="ghost" size="sm" onClick={() => setEditingLead(lead)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm">

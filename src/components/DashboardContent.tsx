@@ -8,6 +8,9 @@ import { UserManagement } from "@/components/views/UserManagement";
 import { RolesPermissions } from "@/components/views/RolesPermissions";
 import { Integrations } from "@/components/views/Integrations";
 import { SystemSettings } from "@/components/views/SystemSettings";
+import { CEOOutreach } from "@/components/views/CEOOutreach";
+import { VCOutreach } from "@/components/views/VCOutreach";
+import { PartnerOutreach } from "@/components/views/PartnerOutreach";
 
 interface DashboardContentProps {
   currentView: string;
@@ -22,6 +25,12 @@ export function DashboardContent({ currentView, userRole }: DashboardContentProp
         return <Overview />;
       case "leads":
         return <LeadManagement />;
+      case "ceo-outreach":
+        return <CEOOutreach />;
+      case "vc-outreach":
+        return <VCOutreach />;
+      case "partner-outreach":
+        return <PartnerOutreach />;
       case "contacts":
         return <Contacts />;
       case "analytics":

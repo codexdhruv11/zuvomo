@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, Search, Plus, Phone, Mail, Building } from "lucide-react";
+import { AddContactForm } from "@/components/AddContactForm";
 
 export function Contacts() {
   return (
@@ -11,10 +12,12 @@ export function Contacts() {
           <h1 className="text-3xl font-bold text-foreground">Contact Management</h1>
           <p className="text-muted-foreground">Manage your customer contacts and relationships</p>
         </div>
-        <Button className="bg-gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Contact
-        </Button>
+        <AddContactForm>
+          <Button className="bg-gradient-primary">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Contact
+          </Button>
+        </AddContactForm>
       </div>
 
       <Card className="bg-gradient-card shadow-card">
