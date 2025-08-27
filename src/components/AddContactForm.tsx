@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { googleSheetsService } from "@/services/googleSheets";
 
 interface AddContactFormProps {
   children?: React.ReactNode;
@@ -45,9 +46,29 @@ export function AddContactForm({ children }: AddContactFormProps) {
     try {
       console.log('Contact data:', data);
       
+      // Prepare contact data for Google Sheets (same format as leads)
+      const contactData = {
+        name: `${data.firstName} ${data.lastName}`,
+        company: data.company,
+        email: data.email,
+        phone: data.phone,
+        stage: 'contacted',
+        leadStatus: 'warm', // Contacts are typically warm leads
+        projectStage: 'Contact',
+        source: 'manual', // Since it's manually added
+        value: 0, // Can be updated later
+        assignedTo: '', // Can be assigned later
+        notes: data.notes,
+        lastContact: new Date().toISOString().split('T')[0],
+        contactType: data.contactType || 'Contact'
+      };
+
+      // Add to Google Sheets using the existing service
+      await googleSheetsService.addLead(contactData);
+      
       toast({
         title: "Contact Added Successfully",
-        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your contacts.`,
+        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your contacts and synced to Google Sheets.`,
       });
 
       form.reset();
@@ -55,7 +76,7 @@ export function AddContactForm({ children }: AddContactFormProps) {
       console.error('Failed to add contact:', error);
       toast({
         title: "Error Adding Contact",
-        description: "Failed to add contact. Please try again.",
+        description: "Failed to add contact to Google Sheets. Please check your connection and try again.",
         variant: "destructive",
       });
     }

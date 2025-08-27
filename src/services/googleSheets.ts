@@ -229,25 +229,34 @@ class GoogleSheetsService {
     }
 
     try {
+      // Determine priority level based on lead status and value
+      const priority = this.calculatePriority(lead.leadStatus, lead.value || 0);
+      
+      // Determine next action based on stage
+      const nextAction = this.determineNextAction(lead.stage || 'new', lead.projectStage || 'Outreach');
+
+      // Enhanced data structure for better boss readability
       const values = [[
         lead.name || '',
         lead.company || '',
         lead.email || '',
         lead.phone || '',
-        lead.stage || 'new',
-        lead.leadStatus || 'cold',
+        this.formatStage(lead.stage || 'new'),
+        this.formatLeadStatus(lead.leadStatus || 'cold'),
         lead.projectStage || 'Outreach',
-        lead.source || '',
-        lead.value || 0,
-        lead.assignedTo || '',
+        lead.source || 'Unknown',
+        this.formatCurrency(lead.value || 0),
+        lead.assignedTo || 'Unassigned',
+        this.formatDate(lead.lastContact || new Date().toISOString().split('T')[0]),
+        lead.contactType || 'Lead',
+        priority,
         lead.notes || '',
-        lead.lastContact || new Date().toISOString().split('T')[0],
-        lead.contactType || 'CEO'
+        nextAction
       ]];
 
       await window.gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: this.config.spreadsheetId,
-        range: this.config.range || 'Sheet1!A:M',
+        range: this.config.range || 'Sheet1!A:O',
         valueInputOption: 'RAW',
         resource: { values }
       });
@@ -259,31 +268,89 @@ class GoogleSheetsService {
     }
   }
 
+  // Helper methods for better data formatting
+  private calculatePriority(leadStatus?: string, value?: number): string {
+    if (leadStatus === 'hot' || (value && value > 50000)) return '🔴 HIGH';
+    if (leadStatus === 'warm' || (value && value > 10000)) return '🟡 MEDIUM';
+    return '🟢 LOW';
+  }
+
+  private determineNextAction(stage?: string, projectStage?: string): string {
+    if (stage === 'new') return '📧 Send Initial Email';
+    if (stage === 'contacted') return '📞 Schedule Follow-up Call';
+    if (stage === 'qualified') return '📋 Send Proposal';
+    if (stage === 'proposal') return '💼 Schedule Meeting';
+    if (stage === 'negotiation') return '✍️ Finalize Contract';
+    if (projectStage === 'Calls') return '📞 Follow-up Call Needed';
+    return '👀 Review Status';
+  }
+
+  private formatStage(stage: string): string {
+    const stageMap: { [key: string]: string } = {
+      'new': '🆕 New Lead',
+      'contacted': '📞 Contacted',
+      'qualified': '✅ Qualified',
+      'proposal': '📋 Proposal Sent',
+      'negotiation': '💼 In Negotiation',
+      'closed-won': '🎉 Closed Won',
+      'closed-lost': '❌ Closed Lost'
+    };
+    return stageMap[stage] || stage;
+  }
+
+  private formatLeadStatus(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'hot': '🔥 Hot',
+      'warm': '🟡 Warm',
+      'cold': '🧊 Cold'
+    };
+    return statusMap[status] || status;
+  }
+
+  private formatCurrency(value: number): string {
+    return value > 0 ? `$${value.toLocaleString()}` : '$0';
+  }
+
+  private formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  }
+
   async updateLead(rowIndex: number, lead: Partial<LeadData>): Promise<boolean> {
     if (!this.isAuthenticated || !this.config) {
       throw new Error('Not authenticated or configured');
     }
 
     try {
+      // Use the same formatting as addLead for consistency
+      const priority = this.calculatePriority(lead.leadStatus, lead.value || 0);
+      const nextAction = this.determineNextAction(lead.stage || 'new', lead.projectStage || 'Outreach');
+
       const values = [[
         lead.name || '',
         lead.company || '',
         lead.email || '',
         lead.phone || '',
-        lead.stage || 'new',
-        lead.leadStatus || 'cold',
+        this.formatStage(lead.stage || 'new'),
+        this.formatLeadStatus(lead.leadStatus || 'cold'),
         lead.projectStage || 'Outreach',
-        lead.source || '',
-        lead.value || 0,
-        lead.assignedTo || '',
+        lead.source || 'Unknown',
+        this.formatCurrency(lead.value || 0),
+        lead.assignedTo || 'Unassigned',
+        this.formatDate(lead.lastContact || new Date().toISOString().split('T')[0]),
+        lead.contactType || 'Lead',
+        priority,
         lead.notes || '',
-        lead.lastContact || new Date().toISOString().split('T')[0],
-        lead.contactType || 'CEO'
+        nextAction
       ]];
 
       await window.gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: this.config.spreadsheetId,
-        range: `Sheet1!A${rowIndex + 2}:M${rowIndex + 2}`, // +2 because of 1-indexing and header
+        range: `Sheet1!A${rowIndex + 2}:O${rowIndex + 2}`, // +2 because of 1-indexing and header
         valueInputOption: 'RAW',
         resource: { values }
       });
@@ -301,22 +368,305 @@ class GoogleSheetsService {
     }
 
     try {
+      // Enhanced headers for better boss readability
       const headers = [[
-        'Name', 'Company', 'Email', 'Phone', 'Stage', 'Lead Status', 
-        'Project Stage', 'Source', 'Value', 'Assigned To', 'Notes', 
-        'Last Contact', 'Contact Type'
+        '📝 Full Name', 
+        '🏢 Company', 
+        '📧 Email', 
+        '📞 Phone', 
+        '🎯 Current Stage', 
+        '🌡️ Lead Temperature', 
+        '📊 Project Status', 
+        '📍 Lead Source', 
+        '💰 Potential Value ($)', 
+        '👤 Assigned Sales Rep', 
+        '📅 Last Contact Date',
+        '🔖 Contact Type',
+        '💼 Priority Level',
+        '📝 Notes & Comments',
+        '📈 Next Action Required'
       ]];
 
       await window.gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: this.config.spreadsheetId,
-        range: 'Sheet1!A1:M1',
+        range: 'Sheet1!A1:O1',
         valueInputOption: 'RAW',
         resource: { values: headers }
       });
 
+      // Add formatting to make it more boss-friendly
+      await this.formatHeadersForBoss();
+
+      // Create the executive summary sheet for the boss
+      await this.createBossSummarySheet();
+
       return true;
     } catch (error) {
       console.error('Failed to create headers:', error);
+      throw error;
+    }
+  }
+
+  // New method to format the spreadsheet for better boss readability
+  async formatHeadersForBoss(): Promise<void> {
+    try {
+      const requests = [
+        // Make header row bold and colored
+        {
+          repeatCell: {
+            range: {
+              sheetId: 0,
+              startRowIndex: 0,
+              endRowIndex: 1
+            },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: {
+                  red: 0.2,
+                  green: 0.6,
+                  blue: 0.9
+                },
+                textFormat: {
+                  foregroundColor: {
+                    red: 1,
+                    green: 1,
+                    blue: 1
+                  },
+                  fontSize: 12,
+                  bold: true
+                },
+                horizontalAlignment: 'CENTER'
+              }
+            },
+            fields: 'userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)'
+          }
+        },
+        // Auto-resize columns
+        {
+          autoResizeDimensions: {
+            dimensions: {
+              sheetId: 0,
+              dimension: 'COLUMNS',
+              startIndex: 0,
+              endIndex: 15
+            }
+          }
+        },
+        // Freeze header row
+        {
+          updateSheetProperties: {
+            properties: {
+              sheetId: 0,
+              gridProperties: {
+                frozenRowCount: 1
+              }
+            },
+            fields: 'gridProperties.frozenRowCount'
+          }
+        }
+      ];
+
+      await window.gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: this.config.spreadsheetId,
+        resource: { requests }
+      });
+    } catch (error) {
+      console.error('Failed to format headers:', error);
+      // Don't throw error - formatting is optional
+    }
+  }
+
+  // Create a boss-friendly summary sheet with key metrics
+  async createBossSummarySheet(): Promise<void> {
+    try {
+      // Create a new sheet for the summary
+      const addSheetRequest = {
+        requests: [{
+          addSheet: {
+            properties: {
+              title: '📊 EXECUTIVE SUMMARY',
+              gridProperties: {
+                rowCount: 50,
+                columnCount: 10
+              }
+            }
+          }
+        }]
+      };
+
+      await window.gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: this.config.spreadsheetId,
+        resource: addSheetRequest
+      });
+
+      // Add summary data
+      const summaryData = [
+        ['🏆 ZUVOMO CRM - EXECUTIVE DASHBOARD', '', '', '', '', '', '', '', ''],
+        [''],
+        ['📈 KEY PERFORMANCE INDICATORS', '', '', '', '', '', '', '', ''],
+        [''],
+        ['Metric', 'Value', 'Status', '', 'Target', 'Achievement', '', '', ''],
+        ['Total Leads', '=COUNTA(Sheet1!A:A)-1', '✅ Active', '', '100', '=B6/E6', '', '', ''],
+        ['Hot Leads', '=COUNTIF(Sheet1!F:F,"🔥 Hot")', '🔥 Priority', '', '20', '=B7/E7', '', '', ''],
+        ['Warm Leads', '=COUNTIF(Sheet1!F:F,"🟡 Warm")', '🟡 Follow-up', '', '40', '=B8/E8', '', '', ''],
+        ['Cold Leads', '=COUNTIF(Sheet1!F:F,"🧊 Cold")', '🧊 Nurture', '', '40', '=B9/E9', '', '', ''],
+        [''],
+        ['💰 REVENUE PIPELINE', '', '', '', '', '', '', '', ''],
+        [''],
+        ['Total Pipeline Value', '=SUMVALUE(Sheet1!I:I)', '💵 Current', '', '$500,000', '=B13/E13', '', '', ''],
+        ['High Priority Deals', '=SUMIF(Sheet1!M:M,"🔴 HIGH",Sheet1!I:I)', '🎯 Focus', '', '$200,000', '=B14/E14', '', '', ''],
+        ['Closed Won', '=SUMIF(Sheet1!E:E,"🎉 Closed Won",Sheet1!I:I)', '✅ Success', '', '$100,000', '=B15/E15', '', '', ''],
+        [''],
+        ['👥 TEAM PERFORMANCE', '', '', '', '', '', '', '', ''],
+        [''],
+        ['Assigned Leads', '=COUNTA(Sheet1!J:J)-COUNTIF(Sheet1!J:J,"Unassigned")', '👤 Active', '', '', '', '', '', ''],
+        ['Unassigned Leads', '=COUNTIF(Sheet1!J:J,"Unassigned")', '⚠️ Needs Assignment', '', '', '', '', '', ''],
+        [''],
+        ['🎯 NEXT ACTIONS REQUIRED', '', '', '', '', '', '', '', ''],
+        [''],
+        ['Follow-up Calls', '=COUNTIF(Sheet1!O:O,"📞*")', '📞 Priority', '', '', '', '', '', ''],
+        ['Send Proposals', '=COUNTIF(Sheet1!O:O,"📋*")', '📋 Action', '', '', '', '', '', ''],
+        ['Schedule Meetings', '=COUNTIF(Sheet1!O:O,"💼*")', '💼 Important', '', '', '', '', '', ''],
+        [''],
+        ['📊 LEAD SOURCES', '', '', '', '', '', '', '', ''],
+        [''],
+        ['Website', '=COUNTIF(Sheet1!H:H,"website")', '', '', '', '', '', '', ''],
+        ['LinkedIn', '=COUNTIF(Sheet1!H:H,"linkedin")', '', '', '', '', '', '', ''],
+        ['Referral', '=COUNTIF(Sheet1!H:H,"referral")', '', '', '', '', '', '', ''],
+        ['Cold Email', '=COUNTIF(Sheet1!H:H,"cold-email")', '', '', '', '', '', '', ''],
+        [''],
+        ['📅 Last Updated: ' + new Date().toLocaleDateString(), '', '', '', '', '', '', '', '']
+      ];
+
+      await window.gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: this.config.spreadsheetId,
+        range: '📊 EXECUTIVE SUMMARY!A1:I32',
+        valueInputOption: 'USER_ENTERED', // Use USER_ENTERED to process formulas
+        resource: { values: summaryData }
+      });
+
+      // Format the summary sheet
+      await this.formatSummarySheet();
+
+    } catch (error) {
+      console.error('Failed to create boss summary sheet:', error);
+      // Don't throw - this is optional
+    }
+  }
+
+  async formatSummarySheet(): Promise<void> {
+    try {
+      const requests = [
+        // Title formatting
+        {
+          repeatCell: {
+            range: {
+              sheetId: 1, // Summary sheet
+              startRowIndex: 0,
+              endRowIndex: 1,
+              startColumnIndex: 0,
+              endColumnIndex: 9
+            },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: { red: 0.1, green: 0.4, blue: 0.8 },
+                textFormat: {
+                  foregroundColor: { red: 1, green: 1, blue: 1 },
+                  fontSize: 16,
+                  bold: true
+                },
+                horizontalAlignment: 'CENTER'
+              }
+            },
+            fields: 'userEnteredFormat'
+          }
+        },
+        // Section headers
+        {
+          repeatCell: {
+            range: {
+              sheetId: 1,
+              startRowIndex: 2,
+              endRowIndex: 3
+            },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 },
+                textFormat: { bold: true, fontSize: 12 }
+              }
+            },
+            fields: 'userEnteredFormat'
+          }
+        }
+      ];
+
+      await window.gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: this.config.spreadsheetId,
+        resource: { requests }
+      });
+    } catch (error) {
+      console.error('Failed to format summary sheet:', error);
+    }
+  }
+
+  // Method to upgrade existing spreadsheet to boss-friendly format
+  async upgradeToBossFriendlyFormat(): Promise<boolean> {
+    if (!this.isAuthenticated || !this.config) {
+      throw new Error('Not authenticated or configured');
+    }
+
+    try {
+      console.log('Upgrading spreadsheet to boss-friendly format...');
+      
+      // Step 1: Update headers
+      await this.createSpreadsheetHeaders();
+      
+      // Step 2: Get existing data
+      const response = await window.gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: this.config.spreadsheetId,
+        range: 'Sheet1!A2:M1000', // Get all data rows (old format)
+      });
+
+      const rows = response.result.values || [];
+      
+      // Step 3: Convert existing data to new format
+      if (rows.length > 0) {
+        const upgradedData = rows.map(row => [
+          row[0] || '', // Name
+          row[1] || '', // Company
+          row[2] || '', // Email
+          row[3] || '', // Phone
+          this.formatStage(row[4] || 'new'), // Stage (formatted)
+          this.formatLeadStatus(row[5] || 'cold'), // Lead Status (formatted)
+          row[6] || 'Outreach', // Project Stage
+          row[7] || 'Unknown', // Source
+          this.formatCurrency(parseFloat(row[8]) || 0), // Value (formatted)
+          row[9] || 'Unassigned', // Assigned To
+          this.formatDate(row[11] || new Date().toISOString().split('T')[0]), // Last Contact (formatted)
+          row[12] || 'Lead', // Contact Type
+          this.calculatePriority(row[5], parseFloat(row[8]) || 0), // Priority (new)
+          row[10] || '', // Notes
+          this.determineNextAction(row[4], row[6]) // Next Action (new)
+        ]);
+
+        // Clear old data and insert upgraded data
+        await window.gapi.client.sheets.spreadsheets.values.clear({
+          spreadsheetId: this.config.spreadsheetId,
+          range: 'Sheet1!A2:O1000'
+        });
+
+        await window.gapi.client.sheets.spreadsheets.values.update({
+          spreadsheetId: this.config.spreadsheetId,
+          range: 'Sheet1!A2:O' + (upgradedData.length + 1),
+          valueInputOption: 'RAW',
+          resource: { values: upgradedData }
+        });
+      }
+
+      console.log('✅ Spreadsheet successfully upgraded to boss-friendly format!');
+      return true;
+    } catch (error) {
+      console.error('Failed to upgrade spreadsheet format:', error);
       throw error;
     }
   }
