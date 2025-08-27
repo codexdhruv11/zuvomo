@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/zuvomo/',
+  base: process.env.NODE_ENV === 'production' && process.env.GITHUB_PAGES ? '/zuvomo/' : '/',
   server: {
     host: "::",
     port: 8080,
