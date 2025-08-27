@@ -33,11 +33,15 @@ export function Login({ onLogin }: LoginProps) {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md bg-gradient-card shadow-card">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">Z</span>
+          <div className="mx-auto mb-6">
+            <img 
+              src="/logo/Zuvomo logo.png" 
+              alt="Zuvomo - Startup Funding Launchpad" 
+              className="h-12 object-contain mx-auto"
+            />
           </div>
           <CardTitle className="text-2xl text-foreground">Welcome to Zuvomo</CardTitle>
-          <CardDescription>Sign in to your sales dashboard</CardDescription>
+          <CardDescription>Sign in to your startup funding launchpad</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

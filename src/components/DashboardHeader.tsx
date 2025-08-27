@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTheme } from "@/hooks/useTheme";
-import zuvomoLogo from "@/assets/zuvomo-logo.png";
+// Import removed - using public logo instead
 
 export function DashboardHeader() {
   const { isDark, toggleTheme } = useTheme();
@@ -29,14 +29,9 @@ export function DashboardHeader() {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Left Section - Logo and Sidebar Toggle */}
+        {/* Left Section - Sidebar Toggle */}
         <div className="flex items-center gap-4">
           <SidebarTrigger />
-          <img 
-            src={zuvomoLogo} 
-            alt="Zuvomo" 
-            className="h-8 w-auto"
-          />
         </div>
 
         {/* Center - Search Bar */}

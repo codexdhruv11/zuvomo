@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Sheets Connectivity Test</h1>
+    
+    <div class="container">
+        <h2>Configuration</h2>
+        <div>
+            <label>Spreadsheet ID:</label>
+            <input type="text" id="spreadsheetId" value="1hKlfId6qs1lkGAfuzJ8JP3iMN9PMqpEZQxxhxNFCY88" style="width: 400px;">
+        </div>
+        <div style="margin-top: 10px;">
+            <label>API Key:</label>
+            <input type="text" id="apiKey" value="AIzaSyArKkgI5-G4sFf8aYDucHPkTBak3u5A6vQ" style="width: 400px;">
+        </div>
+        <div style="margin-top: 10px;">
+            <label>Client ID:</label>
+            <input type="text" id="clientId" value="621750880473-j8l0573l8ggnkg6bskoeuv9r6k8dfdtf.apps.googleusercontent.com" style="width: 400px;">
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Test Actions</h2>
+        <button onclick="initializeAPI()">1. Initialize Google API</button>
+        <button onclick="signIn()">2. Sign In</button>
+        <button onclick="testRead()">3. Test Read</button>
+        <button onclick="testWrite()">4. Test Write</button>
+        <button onclick="signOut()">Sign Out</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        let isSignedIn = false;
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<h3>Results:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function initializeAPI() {
+            showStatus('Initializing Google API...', 'info');
+            
+            gapi.load('client:auth2', function() {
+                const apiKey = document.getElementById('apiKey').value;
+                const clientId = document.getElementById('clientId').value;
+                
+                gapi.client.init({
+                    apiKey: apiKey,
+                    clientId: clientId,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                    scope: 'https://www.googleapis.com/auth/spreadsheets'
+                }).then(function() {
+                    showStatus('Google API initialized successfully!', 'success');
+                    
+                    // Check if user is already signed in
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    isSignedIn = authInstance.isSignedIn.get();
+                    
+                    if (isSignedIn) {
+                        showStatus('Already signed in!', 'success');
+                    }
+                    
+                }).catch(function(error) {
+                    showStatus('Failed to initialize API: ' + error.error, 'error');
+                    console.error('API initialization error:', error);
+                });
+            });
+        }
+
+        function signIn() {
+            if (!gapi.auth2) {
+                showStatus('Please initialize API first!', 'error');
+                return;
+            }
+
+            showStatus('Attempting to sign in...', 'info');
+            
+            const authInstance = gapi.auth2.getAuthInstance();
+            authInstance.signIn().then(function() {
+                isSignedIn = true;
+                const user = authInstance.currentUser.get();
+                const profile = user.getBasicProfile();
+                showStatus(`Signed in as: ${profile.getEmail()}`, 'success');
+            }).catch(function(error) {
+                showStatus('Sign in failed: ' + JSON.stringify(error), 'error');
+                console.error('Sign in error:', error);
+            });
+        }
+
+        function signOut() {
+            if (!gapi.auth2) {
+                showStatus('Please initialize API first!', 'error');
+                return;
+            }
+
+            const authInstance = gapi.auth2.getAuthInstance();
+            authInstance.signOut().then(function() {
+                isSignedIn = false;
+                showStatus('Signed out successfully', 'info');
+            });
+        }
+
+        function testRead() {
+            if (!isSignedIn) {
+                showStatus('Please sign in first!', 'error');
+                return;
+            }
+
+            showStatus('Testing read operation...', 'info');
+            const spreadsheetId = document.getElementById('spreadsheetId').value;
+            
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: spreadsheetId,
+                range: 'Sheet1!A:M'
+            }).then(function(response) {
+                const values = response.result.values || [];
+                showStatus(`Read successful! Found ${values.length} rows`, 'success');
+                showResults(values);
+            }).catch(function(error) {
+                showStatus('Read failed: ' + error.result.error.message, 'error');
+                console.error('Read error:', error);
+            });
+        }
+
+        function testWrite() {
+            if (!isSignedIn) {
+                showStatus('Please sign in first!', 'error');
+                return;
+            }
+
+            showStatus('Testing write operation...', 'info');
+            const spreadsheetId = document.getElementById('spreadsheetId').value;
+            const timestamp = new Date().toISOString();
+            
+            const values = [[
+                'Test Lead ' + timestamp,
+                'Test Company',
+                'test@example.com',
+                '123-456-7890',
+                'new',
+                'cold',
+                'Outreach',
+                'Website',
+                '10000',
+                'Test User',
+                'Test note from connectivity test',
+                new Date().toISOString().split('T')[0],
+                'CEO'
+            ]];
+
+            gapi.client.sheets.spreadsheets.values.append({
+                spreadsheetId: spreadsheetId,
+                range: 'Sheet1!A:M',
+                valueInputOption: 'RAW',
+                resource: { values: values }
+            }).then(function(response) {
+                showStatus('Write successful! Added test data', 'success');
+                showResults(response.result);
+            }).catch(function(error) {
+                showStatus('Write failed: ' + error.result.error.message, 'error');
+                console.error('Write error:', error);
+            });
+        }
+
+        // Auto-initialize when page loads
+        window.onload = function() {
+            showStatus('Ready to test Google Sheets connectivity. Click "Initialize Google API" to start.', 'info');
+        };
+    </script>
+</body>
+</html>
+
+

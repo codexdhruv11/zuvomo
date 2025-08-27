@@ -60,14 +60,18 @@ export function DashboardSidebar({ currentView, setCurrentView, userRole }: Dash
         {/* Logo Section */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">Z</span>
-            </div>
-            {!collapsed && (
-              <div>
-                <h1 className="text-lg font-bold text-foreground">Zuvomo</h1>
-                <p className="text-xs text-muted-foreground">Sales Dashboard</p>
-              </div>
+            {collapsed ? (
+              <img 
+                src="/logo/Z logo .png" 
+                alt="Zuvomo" 
+                className="w-8 h-8 object-contain"
+              />
+            ) : (
+              <img 
+                src="/logo/zuvomo_01.png" 
+                alt="Zuvomo - Startup Funding Launchpad" 
+                className="h-8 object-contain"
+              />
             )}
           </div>
         </div>

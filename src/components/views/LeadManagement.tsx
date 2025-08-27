@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +22,11 @@ import {
   Upload,
   CalendarDays,
   BarChart3,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  Loader2
 } from "lucide-react";
 import { AddLeadForm } from "@/components/AddLeadForm";
+import { LoadingAnimatedLogo } from "@/components/LoadingAnimatedLogo";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   DropdownMenu,
@@ -33,186 +35,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
+import { googleSheetsService, LeadData } from "@/services/googleSheets";
+import { initializeGoogleSheetsWithData, checkIfDataExists } from "@/utils/seedData";
+import { useToast } from "@/hooks/use-toast";
 
-// Sample lead data with CEO/VC outreach info
-const leadData = [
-  {
-    id: 1,
-    name: "John Smith",
-    company: "TechCorp Inc",
-    email: "john.smith@techcorp.com",
-    phone: "+1 (555) 123-4567",
-    stage: "qualified",
-    leadStatus: "warm",
-    projectStage: "Proposal",
-    source: "website",
-    value: 75000,
-    probability: 70,
-    lastContact: "2024-01-15",
-    assignedTo: "Alice Johnson",
-    notes: "Interested in enterprise package",
-    contactType: "CEO",
-    responsibility: "Product Demo Scheduled",
-    recommendations: "Follow up on enterprise features, prepare ROI analysis",
-    outreachType: "CEO",
-    nextAction: "Schedule technical call",
-    urgency: "high"
-  },
-  {
-    id: 2,
-    name: "Sarah Davis",
-    company: "Innovate Solutions",
-    email: "sarah.davis@innovate.com",
-    phone: "+1 (555) 987-6543",
-    stage: "proposal",
-    leadStatus: "hot",
-    projectStage: "Calls",
-    source: "referral",
-    value: 120000,
-    probability: 85,
-    lastContact: "2024-01-14",
-    assignedTo: "Bob Wilson",
-    notes: "Ready to sign, waiting for approval",
-    contactType: "VC",
-    responsibility: "Contract Review",
-    recommendations: "Expedite legal review, prepare implementation timeline",
-    outreachType: "VC",
-    nextAction: "Schedule final approval meeting",
-    urgency: "high"
-  },
-  {
-    id: 3,
-    name: "Mike Chen",
-    company: "Digital Dynamics",
-    email: "mike.chen@digital.com",
-    phone: "+1 (555) 456-7890",
-    stage: "contacted",
-    leadStatus: "cold",
-    projectStage: "Outreach",
-    source: "linkedin",
-    value: 45000,
-    probability: 30,
-    lastContact: "2024-01-13",
-    assignedTo: "Alice Johnson",
-    notes: "Initial interest shown",
-    contactType: "CEO",
-    responsibility: "Needs Assessment",
-    recommendations: "Conduct discovery call, identify pain points",
-    outreachType: "CEO",
-    nextAction: "Schedule discovery call",
-    urgency: "medium"
-  },
-  {
-    id: 4,
-    name: "Lisa Rodriguez",
-    company: "Future Systems",
-    email: "lisa.r@futuresys.com",
-    phone: "+1 (555) 234-5678",
-    stage: "negotiation",
-    leadStatus: "hot",
-    projectStage: "Calls",
-    source: "cold-call",
-    value: 95000,
-    probability: 60,
-    lastContact: "2024-01-12",
-    assignedTo: "Charlie Brown",
-    notes: "Price negotiation in progress",
-    contactType: "VC",
-    responsibility: "Price Negotiation",
-    recommendations: "Prepare competitive analysis, offer volume discount",
-    outreachType: "VC",
-    nextAction: "Present revised proposal",
-    urgency: "high"
-  },
-  {
-    id: 5,
-    name: "David Wilson",
-    company: "Smart Industries",
-    email: "d.wilson@smart.com",
-    phone: "+1 (555) 345-6789",
-    stage: "closed-won",
-    leadStatus: "hot",
-    projectStage: "Closed",
-    source: "website",
-    value: 85000,
-    probability: 100,
-    lastContact: "2024-01-10",
-    assignedTo: "Bob Wilson",
-    notes: "Deal closed successfully",
-    contactType: "CEO",
-    responsibility: "Onboarding Support",
-    recommendations: "Ensure smooth implementation, schedule kickoff meeting",
-    outreachType: "CEO",
-    nextAction: "Begin onboarding process",
-    urgency: "low"
-  },
-  {
-    id: 6,
-    name: "Emma Thompson",
-    company: "Growth Capital",
-    email: "emma.t@growthcap.com",
-    phone: "+1 (555) 567-8901",
-    stage: "qualified",
-    leadStatus: "warm",
-    projectStage: "Proposal",
-    source: "referral",
-    value: 150000,
-    probability: 75,
-    lastContact: "2024-01-16",
-    assignedTo: "Alice Johnson",
-    notes: "Interested in full platform suite",
-    contactType: "VC",
-    responsibility: "Platform Demo",
-    recommendations: "Showcase advanced analytics, prepare case studies",
-    outreachType: "VC",
-    nextAction: "Schedule platform demo",
-    urgency: "high"
-  },
-  {
-    id: 7,
-    name: "Robert Kim",
-    company: "NextGen Ventures",
-    email: "r.kim@nextgen.com",
-    phone: "+1 (555) 678-9012",
-    stage: "contacted",
-    leadStatus: "cold",
-    projectStage: "Outreach",
-    source: "linkedin",
-    value: 200000,
-    probability: 40,
-    lastContact: "2024-01-11",
-    assignedTo: "Charlie Brown",
-    notes: "Exploring options for portfolio companies",
-    contactType: "VC",
-    responsibility: "Portfolio Assessment",
-    recommendations: "Understand portfolio needs, prepare multi-company proposal",
-    outreachType: "VC",
-    nextAction: "Portfolio needs analysis",
-    urgency: "medium"
-  },
-  {
-    id: 8,
-    name: "Jennifer Lee",
-    company: "Innovation Labs",
-    email: "j.lee@innovlabs.com",
-    phone: "+1 (555) 789-0123",
-    stage: "proposal",
-    leadStatus: "warm",
-    projectStage: "Proposal",
-    source: "website",
-    value: 95000,
-    probability: 80,
-    lastContact: "2024-01-09",
-    assignedTo: "Bob Wilson",
-    notes: "Reviewing proposal with board",
-    contactType: "CEO",
-    responsibility: "Board Approval",
-    recommendations: "Prepare board presentation, highlight quick wins",
-    outreachType: "CEO",
-    nextAction: "Board presentation",
-    urgency: "high"
-  }
-];
+// Data now loaded from Google Sheets via state management
 
 // Chart data
 const conversionData = [
@@ -294,6 +121,63 @@ export default function LeadManagement() {
   const [selectedProposalStatus, setSelectedProposalStatus] = useState<string[]>([]);
   const [selectedLeadStatus, setSelectedLeadStatus] = useState("all");
   const [editingLead, setEditingLead] = useState<any>(null);
+  
+  // Google Sheets integration
+  const [leadData, setLeadData] = useState<LeadData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const { toast } = useToast();
+
+  // Load data from Google Sheets
+  const loadLeadsData = async () => {
+    try {
+      setIsLoading(true);
+      await googleSheetsService.autoInitialize();
+      const leads = await googleSheetsService.getLeads();
+      setLeadData(leads);
+    } catch (error) {
+      console.error('Failed to load leads:', error);
+      toast({
+        title: "Error Loading Data",
+        description: "Failed to load leads from Google Sheets. Please check your connection.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initialize Google Sheets with seed data
+  const initializeWithSeedData = async () => {
+    try {
+      setIsInitializing(true);
+      const hasData = await checkIfDataExists();
+      
+      if (!hasData) {
+        await initializeGoogleSheetsWithData();
+        toast({
+          title: "Data Initialized",
+          description: "Google Sheets has been set up with sample lead data.",
+        });
+      }
+      
+      await loadLeadsData();
+    } catch (error) {
+      console.error('Failed to initialize:', error);
+      toast({
+        title: "Initialization Failed",
+        description: "Failed to initialize Google Sheets. Please check your configuration.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    initializeWithSeedData();
+  }, []);
 
   // Filter options
   const teamMembers = ["Alice Johnson", "Bob Wilson", "Charlie Brown"];
@@ -318,12 +202,12 @@ export default function LeadManagement() {
       const matchesStage = selectedStage === "all" || lead.stage === selectedStage;
       const matchesSource = selectedSource === "all" || lead.source === selectedSource;
       const matchesAssignee = selectedAssignee === "all" || lead.assignedTo === selectedAssignee;
-      const matchesOutreachType = selectedOutreachType === "all" || lead.outreachType === selectedOutreachType;
+      const matchesOutreachType = selectedOutreachType === "all" || lead.contactType === selectedOutreachType;
       const matchesLeadStatus = selectedLeadStatus === "all" || lead.leadStatus === selectedLeadStatus;
 
       return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesOutreachType && matchesLeadStatus;
     });
-  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType, selectedLeadStatus]);
+  }, [searchTerm, selectedStage, selectedSource, selectedAssignee, selectedOutreachType, selectedLeadStatus, leadData]);
 
   // Calculate metrics
   const totalLeads = leadData.length;
@@ -333,10 +217,10 @@ export default function LeadManagement() {
   const conversionRate = (leadData.filter(lead => lead.stage === "closed-won").length / totalLeads * 100).toFixed(1);
   
   // CEO/VC specific metrics
-  const ceoLeads = leadData.filter(lead => lead.outreachType === "CEO");
-  const vcLeads = leadData.filter(lead => lead.outreachType === "VC");
-  const ceoConversionRate = (ceoLeads.filter(lead => lead.stage === "closed-won").length / ceoLeads.length * 100).toFixed(1);
-  const vcConversionRate = (vcLeads.filter(lead => lead.stage === "closed-won").length / vcLeads.length * 100).toFixed(1);
+  const ceoLeads = leadData.filter(lead => lead.contactType === "CEO");
+  const vcLeads = leadData.filter(lead => lead.contactType === "VC");
+  const ceoConversionRate = ceoLeads.length > 0 ? (ceoLeads.filter(lead => lead.stage === "closed-won").length / ceoLeads.length * 100).toFixed(1) : "0";
+  const vcConversionRate = vcLeads.length > 0 ? (vcLeads.filter(lead => lead.stage === "closed-won").length / vcLeads.length * 100).toFixed(1) : "0";
   const ceoTotalValue = ceoLeads.reduce((sum, lead) => sum + lead.value, 0);
   const vcTotalValue = vcLeads.reduce((sum, lead) => sum + lead.value, 0);
   
@@ -362,6 +246,96 @@ export default function LeadManagement() {
   const getStageLabel = (stage: string) => {
     return stage.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
+
+  // Handler functions for CRUD operations
+  const handleDeleteLead = async (leadIndex: number, leadName: string) => {
+    if (!window.confirm(`Are you sure you want to delete ${leadName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await googleSheetsService.deleteLead(leadIndex);
+      toast({
+        title: "Lead Deleted",
+        description: `${leadName} has been deleted from your pipeline and Google Sheets.`,
+      });
+      await loadLeadsData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to delete lead:', error);
+      toast({
+        title: "Error Deleting Lead",
+        description: "Failed to delete lead from Google Sheets. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateLeadStatus = async (leadIndex: number, newStatus: string) => {
+    try {
+      await googleSheetsService.updateLeadField(leadIndex, 'leadStatus', newStatus);
+      toast({
+        title: "Status Updated",
+        description: `Lead status updated to ${newStatus}.`,
+      });
+      await loadLeadsData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to update lead status:', error);
+      toast({
+        title: "Error Updating Status",
+        description: "Failed to update lead status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateProjectStage = async (leadIndex: number, newStage: string) => {
+    try {
+      await googleSheetsService.updateLeadField(leadIndex, 'projectStage', newStage);
+      toast({
+        title: "Stage Updated",
+        description: `Project stage updated to ${newStage}.`,
+      });
+      await loadLeadsData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to update project stage:', error);
+      toast({
+        title: "Error Updating Stage",
+        description: "Failed to update project stage. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Show loading state
+  if (isLoading || isInitializing) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              <LoadingAnimatedLogo 
+                className="w-20 h-20"
+                size={80}
+                showProgress={true}
+                progress={75}
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-medium text-foreground mb-1">
+                {isInitializing ? "Setting up Google Sheets..." : "Loading your leads..."}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {isInitializing 
+                  ? "Preparing your lead management system" 
+                  : "Fetching data from Google Sheets"
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -391,7 +365,12 @@ export default function LeadManagement() {
             <Upload className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <AddLeadForm editLead={editingLead} onClose={() => setEditingLead(null)}>
+          <AddLeadForm 
+            editLead={editingLead} 
+            editIndex={editingLead ? leadData.findIndex(lead => lead === editingLead) : undefined}
+            onClose={() => setEditingLead(null)}
+            onLeadUpdated={loadLeadsData}
+          >
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Lead
@@ -836,8 +815,10 @@ export default function LeadManagement() {
 
           {/* Leads Table */}
           <div className="space-y-4">
-            {filteredLeads.map((lead) => (
-              <div key={lead.id} className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+            {filteredLeads.map((lead, filteredIndex) => {
+              const originalIndex = leadData.findIndex(l => l.email === lead.email && l.name === lead.name);
+              return (
+              <div key={`${lead.email}-${filteredIndex}`} className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -845,8 +826,8 @@ export default function LeadManagement() {
                       <Badge className={stageColors[lead.stage as keyof typeof stageColors]}>
                         {getStageLabel(lead.stage)}
                       </Badge>
-                      <Badge variant="outline" className={lead.outreachType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
-                        {lead.outreachType}
+                      <Badge variant="outline" className={lead.contactType === "CEO" ? "border-blue-500 text-blue-600" : "border-purple-500 text-purple-600"}>
+                        {lead.contactType}
                       </Badge>
                       <Badge className={statusColors[lead.leadStatus as keyof typeof statusColors]}>
                         {lead.leadStatus?.charAt(0).toUpperCase() + lead.leadStatus?.slice(1)}
@@ -903,9 +884,9 @@ export default function LeadManagement() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="bg-popover border border-border shadow-md">
-                              <DropdownMenuItem onClick={() => console.log('Update status to cold')}>Cold</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Update status to warm')}>Warm</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Update status to hot')}>Hot</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateLeadStatus(originalIndex, 'cold')}>Cold</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateLeadStatus(originalIndex, 'warm')}>Warm</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateLeadStatus(originalIndex, 'hot')}>Hot</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                           <DropdownMenu>
@@ -915,10 +896,10 @@ export default function LeadManagement() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="bg-popover border border-border shadow-md">
-                              <DropdownMenuItem onClick={() => console.log('Update stage to outreach')}>Outreach</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Update stage to proposal')}>Proposal</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Update stage to calls')}>Calls</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Update stage to closed')}>Closed</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateProjectStage(originalIndex, 'Outreach')}>Outreach</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateProjectStage(originalIndex, 'Proposal')}>Proposal</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateProjectStage(originalIndex, 'Calls')}>Calls</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateProjectStage(originalIndex, 'Closed')}>Closed</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -929,7 +910,11 @@ export default function LeadManagement() {
                            <Button variant="ghost" size="sm" onClick={() => setEditingLead(lead)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeleteLead(originalIndex, lead.name)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -942,7 +927,8 @@ export default function LeadManagement() {
                   </div>
                 )}
               </div>
-            ))}
+            );
+            })}
           </div>
 
           {filteredLeads.length === 0 && (

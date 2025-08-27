@@ -14,7 +14,9 @@ import { googleSheetsService } from "@/services/googleSheets";
 interface AddLeadFormProps {
   children?: React.ReactNode;
   editLead?: any;
+  editIndex?: number;
   onClose?: () => void;
+  onLeadUpdated?: () => void;
 }
 
 interface LeadFormData {
@@ -32,10 +34,25 @@ interface LeadFormData {
   assignedTo: string;
 }
 
-export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
+export function AddLeadForm({ children, editLead, editIndex, onClose, onLeadUpdated }: AddLeadFormProps) {
   const { toast } = useToast();
+  const isEditing = !!editLead;
+  
   const form = useForm<LeadFormData>({
-    defaultValues: {
+    defaultValues: isEditing ? {
+      firstName: editLead?.name?.split(' ')[0] || "",
+      lastName: editLead?.name?.split(' ').slice(1).join(' ') || "",
+      email: editLead?.email || "",
+      phone: editLead?.phone || "",
+      company: editLead?.company || "",
+      position: editLead?.contactType || "",
+      leadType: editLead?.contactType || "",
+      leadStatus: editLead?.leadStatus || "",
+      source: editLead?.source || "",
+      value: editLead?.value?.toString() || "",
+      notes: editLead?.notes || "",
+      assignedTo: editLead?.assignedTo || ""
+    } : {
       firstName: "",
       lastName: "",
       email: "",
@@ -59,31 +76,41 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
         company: data.company,
         email: data.email,
         phone: data.phone,
-        stage: 'new',
+        stage: isEditing ? editLead.stage : 'new',
         leadStatus: data.leadStatus || 'cold',
-        projectStage: 'Outreach',
+        projectStage: isEditing ? editLead.projectStage : 'Outreach',
         source: data.source,
         value: parseFloat(data.value) || 0,
         assignedTo: data.assignedTo,
         notes: data.notes,
-        lastContact: new Date().toISOString().split('T')[0],
+        lastContact: isEditing ? editLead.lastContact : new Date().toISOString().split('T')[0],
         contactType: data.leadType
       };
 
-      // Add to Google Sheets
-      await googleSheetsService.addLead(leadData);
-      
-      toast({
-        title: "Lead Added Successfully",
-        description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline and synced to Google Sheets.`,
-      });
+      if (isEditing && editIndex !== undefined) {
+        // Update existing lead
+        await googleSheetsService.updateLead(editIndex, leadData);
+        toast({
+          title: "Lead Updated Successfully",
+          description: `${data.firstName} ${data.lastName} from ${data.company} has been updated and synced to Google Sheets.`,
+        });
+      } else {
+        // Add new lead
+        await googleSheetsService.addLead(leadData);
+        toast({
+          title: "Lead Added Successfully",
+          description: `${data.firstName} ${data.lastName} from ${data.company} has been added to your pipeline and synced to Google Sheets.`,
+        });
+      }
 
       form.reset();
+      onClose?.();
+      onLeadUpdated?.();
     } catch (error) {
-      console.error('Failed to add lead:', error);
+      console.error(isEditing ? 'Failed to update lead:' : 'Failed to add lead:', error);
       toast({
-        title: "Error Adding Lead",
-        description: "Failed to add lead to Google Sheets. Please check your connection and try again.",
+        title: isEditing ? "Error Updating Lead" : "Error Adding Lead",
+        description: `Failed to ${isEditing ? 'update' : 'add'} lead to Google Sheets. Please check your connection and try again.`,
         variant: "destructive",
       });
     }
@@ -101,9 +128,19 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <div className="flex items-center gap-3 mb-2">
+            <img 
+              src="/logo/Z logo .png" 
+              alt="Zuvomo" 
+              className="w-6 h-6 object-contain"
+            />
+            <DialogTitle>{isEditing ? 'Edit Lead' : 'Add New Lead'}</DialogTitle>
+          </div>
           <DialogDescription>
-            Fill in the details below to add a new lead to your pipeline.
+            {isEditing 
+              ? 'Update the details below to modify this lead in your pipeline.'
+              : 'Fill in the details below to add a new lead to your pipeline.'
+            }
           </DialogDescription>
         </DialogHeader>
         
@@ -347,7 +384,7 @@ export function AddLeadForm({ children, editLead, onClose }: AddLeadFormProps) {
                 Cancel
               </Button>
               <Button type="submit" className="bg-gradient-primary">
-                Add Lead
+                {isEditing ? 'Update Lead' : 'Add Lead'}
               </Button>
             </div>
           </form>
